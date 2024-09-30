@@ -43,7 +43,7 @@ import { Language } from '@mui/icons-material';
 import AttachMoney from '@mui/icons-material/AttachMoney';
 import { useAtom, useAtomValue } from 'jotai';
 import { useUpdateAtom } from 'jotai/utils';
-import { FormattedMessage } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useConnectWalletDialog } from '../hooks/app';
 import { useSelectNetworkDialog } from '../hooks/misc';
 import { getAppConfig } from '../services/app';
@@ -151,6 +151,8 @@ function Navbar() {
   const currency = useAtomValue(currencyAtom);
   const locale = useAtomValue(localeAtom);
 
+  const intl = useIntl();
+
   return (
     <>
       <Menu
@@ -175,9 +177,7 @@ function Navbar() {
             <Language />
           </ListItemIcon>
           <ListItemText
-            primary={
-              <FormattedMessage id="language" defaultMessage="Language" />
-            }
+            primary={intl.formatMessage({ id: "language", defaultMessage: "Language" })}
             secondary={
               <Typography
                 variant="body2"
@@ -194,9 +194,7 @@ function Navbar() {
             <AttachMoney />
           </ListItemIcon>
           <ListItemText
-            primary={
-              <FormattedMessage id="currency" defaultMessage="Currency" />
-            }
+            primary={intl.formatMessage({ id: "currency", defaultMessage: "Currency" })}
             secondary={
               <Typography
                 variant="body2"
@@ -238,7 +236,7 @@ function Navbar() {
               <Wallet />
             </ListItemIcon>
             <ListItemText
-              primary={<FormattedMessage id="wallet" defaultMessage="Wallet" />}
+              primary={intl.formatMessage({ id: "wallet", defaultMessage: "Wallet" })}
             />
           </ListItem>
           {/* <ListItem button onClick={handleDisconnect}>
@@ -315,7 +313,7 @@ function Navbar() {
                 href="/"
                 sx={{ fontWeight: 600, textDecoration: 'none' }}
               >
-                <FormattedMessage id="home" defaultMessage="Home" />
+                {intl.formatMessage({ id: "home", defaultMessage: "Home" })}
               </Link>
               {isActive && (
                 <Link
@@ -323,7 +321,7 @@ function Navbar() {
                   href="/wallet"
                   sx={{ fontWeight: 600, textDecoration: 'none' }}
                 >
-                  <FormattedMessage id="wallet" defaultMessage="Wallet" />
+                  {intl.formatMessage({ id: "wallet", defaultMessage: "Wallet" })}
                 </Link>
               )}
             </Stack>
@@ -372,11 +370,11 @@ function Navbar() {
                   startIcon={<Wallet />}
                   endIcon={<ChevronRightIcon />}
                 >
-                  <FormattedMessage
-                    id="connect.wallet"
-                    defaultMessage="Connect Wallet"
-                    description="Connect wallet button"
-                  />
+                  {intl.formatMessage({
+                    id: "connect.wallet",
+                    defaultMessage: "Connect Wallet",
+                    description: "Connect wallet button"
+                  })}
                 </Button>
               ) : (
                 <Stack direction="row" alignItems="center" spacing={2}>

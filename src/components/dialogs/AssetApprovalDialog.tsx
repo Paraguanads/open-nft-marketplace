@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import {
   Box,
   Button,
@@ -8,7 +9,6 @@ import {
   Typography,
 } from '@mui/material';
 import { useWeb3React } from '@web3-react/core';
-import { FormattedMessage } from 'react-intl';
 import { TransactionStatus } from '../../types/blockchain';
 import { getBlockExplorerUrl } from '../../utils/blockchain';
 
@@ -27,8 +27,8 @@ export function AssetApprovalDialog({
   icon,
   title,
 }: Props) {
+  const intl = useIntl();
   const { onClose } = dialogProps;
-
   const { chainId } = useWeb3React();
 
   return (
@@ -37,16 +37,16 @@ export function AssetApprovalDialog({
         <Stack spacing={2} justifyContent="center" alignItems="center">
           <Box>
             <Typography variant="h5">
-              <FormattedMessage
-                defaultMessage="Approve Asset"
-                id="approve.asset.title"
-              />
+              {intl.formatMessage({
+                id: "approve.asset.title",
+                defaultMessage: "Approve Asset"
+              })}
             </Typography>
             <Typography variant="body1" color="textSecondary">
-              <FormattedMessage
-                defaultMessage="to App"
-                id="approve.asset.description"
-              />
+              {intl.formatMessage({
+                id: "approve.asset.description",
+                defaultMessage: "to App"
+              })}
             </Typography>
           </Box>
           {hash && (
@@ -54,7 +54,10 @@ export function AssetApprovalDialog({
               href={`${getBlockExplorerUrl(chainId)}/tx/${hash}`}
               target="_blank"
             >
-              View transaction
+              {intl.formatMessage({
+                id: "view.transaction",
+                defaultMessage: "View transaction"
+              })}
             </Button>
           )}
         </Stack>

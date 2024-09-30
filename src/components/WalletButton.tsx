@@ -13,7 +13,7 @@ import { useAtomValue } from 'jotai';
 import { useCallback, useState } from 'react';
 import { isBalancesVisibleAtom } from '../state/atoms';
 import { getWalletIcon, truncateAddress } from '../utils/blockchain';
-import { FormattedMessage } from 'react-intl';
+import { useIntl } from 'react-intl';
 
 interface Props {
   align?: 'center' | 'left';
@@ -40,6 +40,8 @@ export function WalletButton(props: Props) {
       connector.deactivate();
     }
   }, [connector]);
+
+  const intl = useIntl();
 
   return (
     <>
@@ -86,7 +88,7 @@ export function WalletButton(props: Props) {
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>
-          <FormattedMessage id="logout.wallet" defaultMessage="Logout wallet" />
+          {intl.formatMessage({ id: "logout.wallet", defaultMessage: "Logout wallet" })}
         </MenuItem>
       </Menu>
     </>

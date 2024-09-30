@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
@@ -14,7 +15,6 @@ import {
 } from '@mui/material';
 import { useAtomValue } from 'jotai';
 import { useCallback } from 'react';
-import { FormattedMessage } from 'react-intl';
 import { transactionsAtom } from '../../state/atoms';
 import {
   Transaction,
@@ -44,6 +44,7 @@ export function TransactionDialog({
   metadata,
   type,
 }: Props) {
+  const intl = useIntl();
   const { onClose } = dialogProps;
   const handleClose = () => onClose!({}, 'backdropClick');
 
@@ -69,36 +70,28 @@ export function TransactionDialog({
   const renderTitle = useCallback(() => {
     if (txState !== undefined) {
       if (txState.status === TransactionStatus.Pending) {
-        return (
-          <FormattedMessage
-            id="transaction.waiting.confirmation"
-            defaultMessage="Waiting confirmation"
-          />
-        );
+        return intl.formatMessage({
+          id: "transaction.waiting.confirmation",
+          defaultMessage: "Waiting confirmation"
+        });
       } else if (txState.status === TransactionStatus.Confirmed) {
-        return (
-          <FormattedMessage
-            id="transaction.confirmed"
-            defaultMessage="Transaction confirmed"
-          />
-        );
+        return intl.formatMessage({
+          id: "transaction.confirmed",
+          defaultMessage: "Transaction confirmed"
+        });
       } else if (txState.status === TransactionStatus.Failed) {
-        return (
-          <FormattedMessage
-            id="transaction.failed"
-            defaultMessage="Transaction Failed"
-          />
-        );
+        return intl.formatMessage({
+          id: "transaction.failed",
+          defaultMessage: "Transaction Failed"
+        });
       }
     } else {
-      return (
-        <FormattedMessage
-          id="transaction.confirm.transaction"
-          defaultMessage="Confirm transaction"
-        />
-      );
+      return intl.formatMessage({
+        id: "transaction.confirm.transaction",
+        defaultMessage: "Confirm transaction"
+      });
     }
-  }, [txState]);
+  }, [txState, intl]);
 
   const isTransactionFailed = txState?.status === TransactionStatus.Failed;
   const isTransactionConfirmed =
@@ -106,37 +99,29 @@ export function TransactionDialog({
 
   const renderMessage = () => {
     if (isTransactionConfirmed) {
-      return (
-        <FormattedMessage
-          id="your.transaction.has.been.confirmed"
-          defaultMessage="Your transaction has been confirmed"
-          description="Your transaction has been confirmed"
-        />
-      );
+      return intl.formatMessage({
+        id: "your.transaction.has.been.confirmed",
+        defaultMessage: "Your transaction has been confirmed",
+        description: "Your transaction has been confirmed"
+      });
     } else if (isTransactionFailed) {
-      return (
-        <FormattedMessage
-          id="confirm.the.transaction.on.your.wallet"
-          defaultMessage="Please, confirm the transaction on your wallet"
-          description="Transaction dialog message before transaction be confirmed in the wallet"
-        />
-      );
+      return intl.formatMessage({
+        id: "confirm.the.transaction.on.your.wallet",
+        defaultMessage: "Please, confirm the transaction on your wallet",
+        description: "Transaction dialog message before transaction be confirmed in the wallet"
+      });
     } else if (hash === undefined) {
-      return (
-        <FormattedMessage
-          id="confirm.the.transaction.on.your.wallet"
-          defaultMessage="Please, confirm the transaction on your wallet"
-          description="Transaction dialog message before transaction be confirmed in the wallet"
-        />
-      );
+      return intl.formatMessage({
+        id: "confirm.the.transaction.on.your.wallet",
+        defaultMessage: "Please, confirm the transaction on your wallet",
+        description: "Transaction dialog message before transaction be confirmed in the wallet"
+      });
     } else {
-      return (
-        <FormattedMessage
-          id="please.wait.for.the.block.confirmation"
-          defaultMessage="Wait for the block confirmation"
-          description="Transaction dialog message after transaction confirmation in the wallet"
-        />
-      );
+      return intl.formatMessage({
+        id: "please.wait.for.the.block.confirmation",
+        defaultMessage: "Wait for the block confirmation",
+        description: "Transaction dialog message after transaction confirmation in the wallet"
+      });
     }
   };
 
@@ -147,7 +132,7 @@ export function TransactionDialog({
           <CloseCircle color="error" fontSize="large" />
           <Box>
             <Typography align="center" variant="h5">
-              <FormattedMessage id="error" defaultMessage="Error" />
+              {intl.formatMessage({ id: "error", defaultMessage: "Error" })}
             </Typography>
             <Typography align="center" variant="body1" color="textSecondary">
               {error?.message}
@@ -155,11 +140,11 @@ export function TransactionDialog({
           </Box>
           {hash !== undefined && (
             <Button color="primary">
-              <FormattedMessage
-                id="view.transaction"
-                defaultMessage="View Transaction"
-                description="View transaction"
-              />
+              {intl.formatMessage({
+                id: "view.transaction",
+                defaultMessage: "View Transaction",
+                description: "View transaction"
+              })}
             </Button>
           )}
         </Stack>
@@ -197,11 +182,11 @@ export function TransactionDialog({
                 href={`${getBlockExplorerUrl(txState?.chainId)}/tx/${hash}`}
                 target="_blank"
               >
-                <FormattedMessage
-                  id="view.transaction"
-                  defaultMessage="View Transaction"
-                  description="View transaction"
-                />
+                {intl.formatMessage({
+                  id: "view.transaction",
+                  defaultMessage: "View Transaction",
+                  description: "View transaction"
+                })}
               </Button>
             </>
           )}
@@ -229,11 +214,11 @@ export function TransactionDialog({
         >
           <ReceiptText />
           <Typography variant="inherit">
-            <FormattedMessage
-              id="transaction"
-              defaultMessage="Transaction"
-              description="Transaction dialog title"
-            />
+            {intl.formatMessage({
+              id: "transaction",
+              defaultMessage: "Transaction",
+              description: "Transaction dialog title"
+            })}
           </Typography>
         </Stack>
         {onClose && (

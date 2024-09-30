@@ -29,6 +29,13 @@ import { getAppConfig } from '../src/services/app';
 
 import SEO from '../next-seo.config';
 
+import dynamic from 'next/dynamic';
+
+const Web3ProviderNoSSR = dynamic(
+  () => import('../src/components/Web3Provider').then(mod => mod.Web3Provider),
+  { ssr: false }
+);
+
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
 
@@ -72,15 +79,10 @@ export default function MyApp(props: MyAppProps) {
                   <DefaultSeo {...SEO} />
                   <CssBaseline />
                   <LocalizationProvider dateAdapter={AdapterMoment}>
-                    <Web3ReactProvider
-                      connectors={[
-                        [metaMask as any, metaMaskHooks],
-                        [walletConnect, walletConnectHooks],
-                      ]}
-                    >
+                    <Web3ProviderNoSSR>
                       <Updater />
                       {getLayout(<Component {...pageProps} />)}
-                    </Web3ReactProvider>
+                    </Web3ProviderNoSSR>
                   </LocalizationProvider>
                 </AppIntlProvider>
               </SnackbarProvider>

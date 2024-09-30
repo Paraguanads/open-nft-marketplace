@@ -26,7 +26,7 @@ import transakSDK from '@transak/transak-sdk';
 
 import WalletBalances from '../../src/modules/wallet/components/WalletBalancesTable';
 
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import {
   TransactionsTable,
   TransactionsTableFilter,
@@ -67,7 +67,7 @@ const appConfig = getAppConfig();
 const Wallet: NextPage = () => {
   const { account, ENSName } = useWeb3React();
 
-  const { formatMessage } = useIntl();
+  const intl = useIntl();
 
   const favorites = useFavoriteAssets();
 
@@ -145,7 +145,7 @@ const Wallet: NextPage = () => {
   return (
     <>
       <NextSeo
-        title={formatMessage({
+        title={intl.formatMessage({
           id: 'my.wallet',
           defaultMessage: 'My Wallet',
         })}
@@ -174,15 +174,11 @@ const Wallet: NextPage = () => {
               <PageHeader
                 breadcrumbs={[
                   {
-                    caption: (
-                      <FormattedMessage id="home" defaultMessage="Home" />
-                    ),
+                    caption: intl.formatMessage({ id: "home", defaultMessage: "Home" }),
                     uri: '/',
                   },
                   {
-                    caption: (
-                      <FormattedMessage id="wallet" defaultMessage="Wallet" />
-                    ),
+                    caption: intl.formatMessage({ id: "wallet", defaultMessage: "Wallet" }),
                     uri: '/wallet',
                     active: true,
                   },
@@ -236,7 +232,7 @@ const Wallet: NextPage = () => {
                               variant="contained"
                               color="primary"
                             >
-                              <FormattedMessage id="buy" defaultMessage="Buy" />
+                              {intl.formatMessage({ id: "buy", defaultMessage: "Buy" })}
                             </Button>
                           </Grid>
                         )}
@@ -247,10 +243,7 @@ const Wallet: NextPage = () => {
                             variant="outlined"
                             color="primary"
                           >
-                            <FormattedMessage
-                              id="receive"
-                              defaultMessage="Receive"
-                            />
+                            {intl.formatMessage({ id: "receive", defaultMessage: "Receive" })}
                           </Button>
                         </Grid>
                       </Grid>
@@ -287,10 +280,7 @@ const Wallet: NextPage = () => {
                         startIcon={<ImportExportIcon />}
                         fullWidth
                       >
-                        <FormattedMessage
-                          id="import.token"
-                          defaultMessage="Import token"
-                        />
+                        {intl.formatMessage({ id: "import.token", defaultMessage: "Import token" })}
                       </Button>
                     </Grid>
                   </Grid>
@@ -317,9 +307,9 @@ const Wallet: NextPage = () => {
                     }
                   >
                     {isTableOpen ? (
-                      <FormattedMessage id="close" defaultMessage="Close" />
+                      intl.formatMessage({ id: "close", defaultMessage: "Close" })
                     ) : (
-                      <FormattedMessage id="open" defaultMessage="Open" />
+                      intl.formatMessage({ id: "open", defaultMessage: "Open" })
                     )}
                   </Button>
                 </Grid>
@@ -338,7 +328,7 @@ const Wallet: NextPage = () => {
                           alignContent="center"
                         >
                           <Typography variant="h5">
-                            <FormattedMessage id="nfts" defaultMessage="NFTs" />
+                            {intl.formatMessage({ id: "nfts", defaultMessage: "NFTs" })}
                           </Typography>
                           {Object.keys(favorites.assets).length > 0 && (
                             <Chip
@@ -362,7 +352,7 @@ const Wallet: NextPage = () => {
                             color="primary"
                             variant="body1"
                           >
-                            <FormattedMessage id="open" defaultMessage="Open" />
+                            {intl.formatMessage({ id: "open", defaultMessage: "Open" })}
                           </Typography>
                           <NavigateNext color="primary" />
                         </Stack>
@@ -380,10 +370,7 @@ const Wallet: NextPage = () => {
                           alignContent="center"
                         >
                           <Typography variant="h5">
-                            <FormattedMessage
-                              id="orders"
-                              defaultMessage="Orders"
-                            />
+                            {intl.formatMessage({ id: "orders", defaultMessage: "Orders" })}
                           </Typography>
                           {/* <Chip label="302" color="secondary" /> */}
                         </Stack>
@@ -402,7 +389,7 @@ const Wallet: NextPage = () => {
                             color="primary"
                             variant="body1"
                           >
-                            <FormattedMessage id="open" defaultMessage="Open" />
+                            {intl.formatMessage({ id: "open", defaultMessage: "Open" })}
                           </Typography>
                           <NavigateNext color="primary" />
                         </Stack>
@@ -414,18 +401,11 @@ const Wallet: NextPage = () => {
                   <Tabs value={selectedTab} onChange={handleChangeTab}>
                     <Tab
                       value={WalletTabs.Transactions}
-                      label={
-                        <FormattedMessage
-                          id="transactions"
-                          defaultMessage="Transactions"
-                        />
-                      }
+                      label={intl.formatMessage({ id: "transactions", defaultMessage: "Transactions" })}
                     />
                     <Tab
                       value={WalletTabs.Trades}
-                      label={
-                        <FormattedMessage id="trades" defaultMessage="Trades" />
-                      }
+                      label={intl.formatMessage({ id: "trades", defaultMessage: "Trades" })}
                     />
                   </Tabs>
                 </Grid>

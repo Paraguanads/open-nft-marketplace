@@ -25,7 +25,7 @@ import type { BigNumber } from 'ethers';
 import { NextPage } from 'next';
 import Image from 'next/image';
 import { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import MainLayout from '../../src/components/layouts/main';
 import Link from '../../src/components/Link';
 import { useSignMessageDialog, useTransactions } from '../../src/hooks/app';
@@ -81,7 +81,7 @@ export const OrdersIndex: NextPage = () => {
 
   const transactions = useTransactions();
 
-  const { formatMessage } = useIntl();
+  const intl = useIntl();
 
   const assets = useMemo(() => {
     return Object.keys(favorites.assets).map((key) => {
@@ -195,7 +195,7 @@ export const OrdersIndex: NextPage = () => {
   const handleOpenSignMessageListingDialog = useCallback(() => {
     signMessageDialog.setOpen(true);
     signMessageDialog.setMessage(
-      formatMessage({
+      intl.formatMessage({
         id: 'creating.a.listing',
         defaultMessage: 'Creating a listing',
       })
@@ -212,7 +212,7 @@ export const OrdersIndex: NextPage = () => {
   const handleOpenSignMessageOfferDialog = useCallback(() => {
     signMessageDialog.setOpen(true);
     signMessageDialog.setMessage(
-      formatMessage({
+      intl.formatMessage({
         id: 'creating.an.offer',
         defaultMessage: 'Creating an offer',
       })
@@ -340,7 +340,7 @@ export const OrdersIndex: NextPage = () => {
   return (
     <>
       <NextSeo
-        title={formatMessage({
+        title={intl.formatMessage({
           id: 'create.order',
           defaultMessage: 'Create Order',
         })}
@@ -368,16 +368,14 @@ export const OrdersIndex: NextPage = () => {
             <PageHeader
               breadcrumbs={[
                 {
-                  caption: <FormattedMessage id="home" defaultMessage="Home" />,
+                  caption: intl.formatMessage({ id: "home", defaultMessage: "Home" }),
                   uri: '/',
                 },
                 {
-                  caption: (
-                    <FormattedMessage
-                      id="create.order"
-                      defaultMessage="Create Order"
-                    />
-                  ),
+                  caption: intl.formatMessage({
+                    id: "create.order",
+                    defaultMessage: "Create Order"
+                  }),
                   uri: '/order/create',
                   active: true,
                 },
@@ -398,10 +396,10 @@ export const OrdersIndex: NextPage = () => {
                 >
                   {isDesktop && (
                     <Typography>
-                      <FormattedMessage
-                        id="Create.Order"
-                        defaultMessage="Create Order"
-                      />
+                      {intl.formatMessage({
+                        id: "Create.Order",
+                        defaultMessage: "Create Order"
+                      })}
                     </Typography>
                   )}
 
@@ -412,7 +410,7 @@ export const OrdersIndex: NextPage = () => {
                     size="small"
                     fullWidth={!isDesktop}
                   >
-                    <FormattedMessage id="import" defaultMessage="Import NFT" />
+                    {intl.formatMessage({ id: "import", defaultMessage: "Import NFT" })}
                   </Button>
                 </Box>
               </CardContent>
@@ -433,7 +431,7 @@ export const OrdersIndex: NextPage = () => {
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label={formatMessage({
+                          label={intl.formatMessage({
                             id: 'nfts',
                             defaultMessage: 'NFTs',
                           })}
@@ -453,14 +451,16 @@ export const OrdersIndex: NextPage = () => {
                   {hasChainDiff && (
                     <Grid item xs={12}>
                       <Alert severity="warning">
-                        <FormattedMessage
-                          id="switch.network.content.text"
-                          defaultMessage="Please, switch to {chainName} network to create listings or offers for this asset"
-                          description="Switch network dialog content text"
-                          values={{
+                        {intl.formatMessage(
+                          {
+                            id: "switch.network.content.text",
+                            defaultMessage: "Please, switch to {chainName} network to create listings or offers for this asset",
+                            description: "Switch network dialog content text"
+                          },
+                          {
                             chainName: <b>{getChainName(asset?.chainId)}</b>,
-                          }}
-                        />
+                          }
+                        )}
                       </Alert>
                     </Grid>
                   )}
@@ -513,10 +513,10 @@ export const OrdersIndex: NextPage = () => {
                               )}
                             </Typography>
                             <Typography variant="caption" color="textSecondary">
-                              <FormattedMessage
-                                id="owned.by"
-                                defaultMessage="Owned by"
-                              />
+                              {intl.formatMessage({
+                                id: "owned.by",
+                                defaultMessage: "Owned by"
+                              })}
                             </Typography>
                             <Link
                               href={`${getBlockExplorerUrl(
@@ -533,14 +533,13 @@ export const OrdersIndex: NextPage = () => {
                                 spacing={0.5}
                               >
                                 <div>
-                                  {isAddressEqual(account, asset?.owner) ? (
-                                    <FormattedMessage
-                                      id="you"
-                                      defaultMessage="you"
-                                    />
-                                  ) : (
-                                    truncateAddress(asset?.owner)
-                                  )}
+                                  {isAddressEqual(account, asset?.owner) 
+                                    ? intl.formatMessage({
+                                        id: "you",
+                                        defaultMessage: "you"
+                                      })
+                                    : truncateAddress(asset?.owner)
+                                  }
                                 </div>
                                 <Launch fontSize="inherit" />
                               </Stack>
@@ -552,10 +551,10 @@ export const OrdersIndex: NextPage = () => {
                   ) : (
                     <Grid item xs={12}>
                       <Alert severity="info">
-                        <FormattedMessage
-                          id="select.or.import.nft"
-                          defaultMessage="Select or import a NFT to create an order"
-                        />
+                        {intl.formatMessage({
+                          id: "select.or.import.nft",
+                          defaultMessage: "Select or import a NFT to create an order"
+                        })}
                       </Alert>
                     </Grid>
                   )}

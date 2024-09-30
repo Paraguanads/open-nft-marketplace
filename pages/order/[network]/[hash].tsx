@@ -1,9 +1,9 @@
+import { useIntl } from 'react-intl';
 import { Grid, Skeleton } from '@mui/material';
 import Container from '@mui/material/Container';
 import type { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
 import { dehydrate, QueryClient } from 'react-query';
 import MainLayout from '../../../src/components/layouts/main';
 import { PageHeader } from '../../../src/components/PageHeader';
@@ -25,11 +25,11 @@ import {
 import { TraderOrderFilter } from '../../../src/utils/types';
 
 const OrderDetail: NextPage = () => {
+  const intl = useIntl();
   const router = useRouter();
   const { hash, network } = router.query;
   const chainId = getChainIdFromName(network as string)?.chainId;
 
-  const { formatMessage } = useIntl();
   const query = useOrderBook({
     chainId,
     nonce: hash as string,
@@ -53,7 +53,7 @@ const OrderDetail: NextPage = () => {
           <PageHeader
             breadcrumbs={[
               {
-                caption: <FormattedMessage id="home" defaultMessage="Home" />,
+                caption: intl.formatMessage({ id: "home", defaultMessage: "Home" }),
                 uri: '/',
               },
               {
@@ -73,7 +73,7 @@ const OrderDetail: NextPage = () => {
                 }/${firstOrder?.nftTokenId}`,
               },
               {
-                caption: `${formatMessage({
+                caption: `${intl.formatMessage({
                   id: 'order',
                   defaultMessage: 'Order',
                 })} #${firstOrder?.order?.nonce.substring(

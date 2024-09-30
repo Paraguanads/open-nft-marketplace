@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { focusAtom } from 'jotai/optics';
+import { focusAtom } from 'jotai-optics';
 import { atomWithStorage } from 'jotai/utils';
 import { getAppConfig } from '../services/app';
 import { AppState } from '../types/app';

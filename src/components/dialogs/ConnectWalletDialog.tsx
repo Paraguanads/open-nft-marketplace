@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import {
   Avatar,
   Box,
@@ -16,8 +17,6 @@ import {
 import { useState } from 'react';
 
 import metamaskIcon from '../../../public/assets/images/metamask-fox.svg';
-
-import { FormattedMessage } from 'react-intl';
 import walletConnectIcon from '../../../public/assets/images/walletconnect-circle-blue.svg';
 import { useWalletActivate } from '../../hooks/misc';
 import { AppDialogTitle } from '../AppDialogTitle';
@@ -27,6 +26,7 @@ interface Props {
 }
 
 function ConnectWalletDialog({ dialogProps }: Props) {
+  const intl = useIntl();
   const { onClose } = dialogProps;
 
   const walletActivate = useWalletActivate();
@@ -50,13 +50,11 @@ function ConnectWalletDialog({ dialogProps }: Props) {
   return (
     <Dialog {...dialogProps} onClose={handelClose}>
       <AppDialogTitle
-        title={
-          <FormattedMessage
-            id="connect.your.wallet"
-            defaultMessage={'Connect your Wallet'}
-            description={'Connect wallet message'}
-          />
-        }
+        title={intl.formatMessage({
+          id: "connect.your.wallet",
+          defaultMessage: 'Connect your Wallet',
+          description: 'Connect wallet message'
+        })}
         onClose={handelClose}
       />
       <Divider />

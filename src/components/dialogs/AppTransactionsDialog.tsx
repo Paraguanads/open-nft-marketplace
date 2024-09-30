@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { useIntl } from 'react-intl';
 
 import { Error } from '@mui/icons-material';
 import {
@@ -23,7 +24,6 @@ import {
 import { useWeb3React } from '@web3-react/core';
 import { useAtom, useAtomValue } from 'jotai';
 import moment from 'moment';
-import { FormattedMessage } from 'react-intl';
 import { transactionsAtom, uncheckedTransactionsAtom } from '../../state/atoms';
 import {
   Transaction,
@@ -50,6 +50,7 @@ interface Props {
 }
 
 export function AppTransactionsDialog({ dialogProps }: Props) {
+  const intl = useIntl();
   const { onClose } = dialogProps;
   const { chainId } = useWeb3React();
   const [transactions, updateTransactions] = useAtom(transactionsAtom);
@@ -116,10 +117,10 @@ export function AppTransactionsDialog({ dialogProps }: Props) {
       return (
         <Stack sx={{ py: 2 }} alignItems="center" justifyContent="center">
           <Typography variant="body1">
-            <FormattedMessage
-              id="nothing.to.see.here"
-              defaultMessage="Nothing to see here"
-            />
+            {intl.formatMessage({
+              id: "nothing.to.see.here",
+              defaultMessage: "Nothing to see here"
+            })}
           </Typography>
         </Stack>
       );
@@ -163,8 +164,7 @@ export function AppTransactionsDialog({ dialogProps }: Props) {
               <ListItemSecondaryAction>
                 {transactions[hash].status === TransactionStatus.Pending ? (
                   <CircularProgress size="1.5rem" />
-                ) : transactions[hash].status ===
-                  TransactionStatus.Confirmed ? (
+                ) : transactions[hash].status === TransactionStatus.Confirmed ? (
                   <CheckCircleIcon />
                 ) : transactions[hash].status === TransactionStatus.Failed ? (
                   <Error />
@@ -197,13 +197,11 @@ export function AppTransactionsDialog({ dialogProps }: Props) {
   return (
     <Dialog {...dialogProps} onClose={handleClose}>
       <AppDialogTitle
-        title={
-          <FormattedMessage
-            id="transactions"
-            defaultMessage="Transactions"
-            description="Transactions dialog title"
-          />
-        }
+        title={intl.formatMessage({
+          id: "transactions",
+          defaultMessage: "Transactions",
+          description: "Transactions dialog title"
+        })}
         onClose={handleClose}
       />
       <Divider />
@@ -211,11 +209,11 @@ export function AppTransactionsDialog({ dialogProps }: Props) {
       <DialogActions>
         {notificationsKeys.length > 0 && (
           <Button onClick={handleClearTransactions}>
-            <FormattedMessage
-              id="clear.transactions"
-              defaultMessage="Clear Transactions"
-              description="Clear transactions button label"
-            />
+            {intl.formatMessage({
+              id: "clear.transactions",
+              defaultMessage: "Clear Transactions",
+              description: "Clear transactions button label"
+            })}
           </Button>
         )}
       </DialogActions>

@@ -16,7 +16,7 @@ import {
 import type { NextPage } from 'next';
 import { Suspense, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { FormattedMessage } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { QueryErrorResetBoundary } from 'react-query';
 import Funnel from '../../src/components/icons/Filter';
 import MainLayout from '../../src/components/layouts/main';
@@ -28,6 +28,7 @@ import TableSkeleton from '../../src/modules/nft/components/tables/TableSkeleton
 import WalletOrders from '../../src/modules/wallet/components/WalletOrders';
 
 const WalletOrder: NextPage = () => {
+  const intl = useIntl();
   const [sellOrBuy, setSellOrBuy] = useState<SellOrBuy>(SellOrBuy.All);
   const [orderStatus, setOrderStatus] = useState<TraderOrderStatus>(
     TraderOrderStatus.All
@@ -49,13 +50,13 @@ const WalletOrder: NextPage = () => {
   const renderSidebar = (onClose?: () => void) => {
     return (
       <SidebarFilters
-        title={<FormattedMessage id="filters" defaultMessage="Filters" />}
+        title={intl.formatMessage({ id: "filters", defaultMessage: "Filters" })}
         onClose={onClose}
       >
         <SidebarFiltersContent>
           <Stack spacing={2}>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
-              <FormattedMessage id="order.type" defaultMessage="Order type" />
+              {intl.formatMessage({ id: "order.type", defaultMessage: "Order type" })}
             </Typography>
             <Select
               size="small"
@@ -63,17 +64,17 @@ const WalletOrder: NextPage = () => {
               onChange={handleChangeSellOrBuy}
             >
               <MenuItem value={SellOrBuy.All}>
-                <FormattedMessage id="select.type" defaultMessage="All" />
+                {intl.formatMessage({ id: "select.type", defaultMessage: "All" })}
               </MenuItem>
               <MenuItem value={SellOrBuy.Sell}>
-                <FormattedMessage id="listings" defaultMessage="Listings" />
+                {intl.formatMessage({ id: "listings", defaultMessage: "Listings" })}
               </MenuItem>
               <MenuItem value={SellOrBuy.Buy}>
-                <FormattedMessage id="offers" defaultMessage="Offers" />
+                {intl.formatMessage({ id: "offers", defaultMessage: "Offers" })}
               </MenuItem>
             </Select>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
-              <FormattedMessage id="status" defaultMessage="Status" />
+              {intl.formatMessage({ id: "status", defaultMessage: "Status" })}
             </Typography>
             <Select
               size="small"
@@ -81,16 +82,16 @@ const WalletOrder: NextPage = () => {
               onChange={handleChangeOrderStatus}
             >
               <MenuItem value={TraderOrderStatus.All}>
-                <FormattedMessage id="all" defaultMessage="All" />
+                {intl.formatMessage({ id: "all", defaultMessage: "All" })}
               </MenuItem>
               <MenuItem value={TraderOrderStatus.Expired}>
-                <FormattedMessage id="expired" defaultMessage="Expired" />
+                {intl.formatMessage({ id: "expired", defaultMessage: "Expired" })}
               </MenuItem>
               <MenuItem value={TraderOrderStatus.Open}>
-                <FormattedMessage id="open" defaultMessage="Open" />
+                {intl.formatMessage({ id: "open", defaultMessage: "Open" })}
               </MenuItem>
               <MenuItem value={TraderOrderStatus.Filled}>
-                <FormattedMessage id="filled" defaultMessage="Filled" />
+                {intl.formatMessage({ id: "filled", defaultMessage: "Filled" })}
               </MenuItem>
             </Select>
           </Stack>
@@ -131,21 +132,15 @@ const WalletOrder: NextPage = () => {
                 <PageHeader
                   breadcrumbs={[
                     {
-                      caption: (
-                        <FormattedMessage id="home" defaultMessage="Home" />
-                      ),
+                      caption: intl.formatMessage({ id: "home", defaultMessage: "Home" }),
                       uri: '/',
                     },
                     {
-                      caption: (
-                        <FormattedMessage id="wallet" defaultMessage="Wallet" />
-                      ),
+                      caption: intl.formatMessage({ id: "wallet", defaultMessage: "Wallet" }),
                       uri: '/wallet',
                     },
                     {
-                      caption: (
-                        <FormattedMessage id="orders" defaultMessage="Orders" />
-                      ),
+                      caption: intl.formatMessage({ id: "orders", defaultMessage: "Orders" }),
                       uri: '/wallet/orders',
                       active: true,
                     },
@@ -162,11 +157,11 @@ const WalletOrder: NextPage = () => {
                     alignContent="center"
                   >
                     <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                      <FormattedMessage
-                        id="orders"
-                        defaultMessage="Orders"
-                        description="Orders"
-                      />
+                      {intl.formatMessage({
+                        id: "orders",
+                        defaultMessage: "Orders",
+                        description: "Orders"
+                      })}
                     </Typography>
                     <Box>
                       {isMobile && (
@@ -187,11 +182,11 @@ const WalletOrder: NextPage = () => {
                         <Paper sx={{ p: 1 }}>
                           <Stack justifyContent="center" alignItems="center">
                             <Typography variant="h6">
-                              <FormattedMessage
-                                id="something.went.wrong"
-                                defaultMessage="Oops, something went wrong"
-                                description="Something went wrong error message"
-                              />
+                              {intl.formatMessage({
+                                id: "something.went.wrong",
+                                defaultMessage: "Oops, something went wrong",
+                                description: "Something went wrong error message"
+                              })}
                             </Typography>
                             <Typography variant="body1" color="textSecondary">
                               {String(error)}
@@ -200,11 +195,11 @@ const WalletOrder: NextPage = () => {
                               color="primary"
                               onClick={resetErrorBoundary}
                             >
-                              <FormattedMessage
-                                id="try.again"
-                                defaultMessage="Try again"
-                                description="Try again"
-                              />
+                              {intl.formatMessage({
+                                id: "try.again",
+                                defaultMessage: "Try again",
+                                description: "Try again"
+                              })}
                             </Button>
                           </Stack>
                         </Paper>

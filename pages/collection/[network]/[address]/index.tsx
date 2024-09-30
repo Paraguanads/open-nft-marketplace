@@ -19,7 +19,7 @@ import {
 import { NextSeo } from 'next-seo';
 import { useRouter } from 'next/router';
 import { Suspense, useState } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { dehydrate, QueryClient } from 'react-query';
 import { AppErrorBoundary } from '../../../../src/components/AppErrorBoundary';
 import Funnel from '../../../../src/components/icons/Filter';
@@ -44,8 +44,8 @@ import { getChainIdFromName } from '../../../../src/utils/blockchain';
 import { TraderOrderFilter } from '../../../../src/utils/types';
 
 const CollectionPage: NextPage = () => {
+  const intl = useIntl();
   const router = useRouter();
-  const { formatMessage } = useIntl();
   const { address, network } = router.query;
   const chainId = getChainIdFromName(network as string)?.chainId;
   const [search, setSearch] = useState<string>();
@@ -67,7 +67,7 @@ const CollectionPage: NextPage = () => {
   const renderSidebar = (onClose?: () => void) => {
     return (
       <SidebarFilters
-        title={<FormattedMessage id="filters" defaultMessage="Filters" />}
+        title={intl.formatMessage({ id: "filters", defaultMessage: "Filters" })}
         onClose={onClose}
       >
         <SidebarFiltersContent>
@@ -77,7 +77,7 @@ const CollectionPage: NextPage = () => {
             type="search"
             value={search}
             onChange={handleChangeSearch}
-            placeholder={formatMessage({
+            placeholder={intl.formatMessage({
               id: 'search.in.collection',
               defaultMessage: 'Search in collection',
             })}
@@ -146,11 +146,11 @@ const CollectionPage: NextPage = () => {
                         alignContent="center"
                       >
                         <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                          <FormattedMessage
-                            id="collection"
-                            defaultMessage="Collection"
-                            description="collection"
-                          />
+                          {intl.formatMessage({
+                            id: "collection",
+                            defaultMessage: "Collection",
+                            description: "collection"
+                          })}
                         </Typography>
                         <Box>
                           {!isDesktop && (
@@ -169,7 +169,7 @@ const CollectionPage: NextPage = () => {
                           type="search"
                           value={search}
                           onChange={handleChangeSearch}
-                          placeholder={formatMessage({
+                          placeholder={intl.formatMessage({
                             id: 'search.in.collection',
                             defaultMessage: 'Search in collection',
                           })}
@@ -190,11 +190,11 @@ const CollectionPage: NextPage = () => {
                           fallbackRender={({ resetErrorBoundary, error }) => (
                             <Stack justifyContent="center" alignItems="center">
                               <Typography variant="h6">
-                                <FormattedMessage
-                                  id="something.went.wrong"
-                                  defaultMessage="Oops, something went wrong"
-                                  description="Something went wrong error message"
-                                />
+                                {intl.formatMessage({
+                                  id: "something.went.wrong",
+                                  defaultMessage: "Oops, something went wrong",
+                                  description: "Something went wrong error message"
+                                })}
                               </Typography>
                               <Typography variant="body1" color="textSecondary">
                                 {String(error)}
@@ -203,11 +203,11 @@ const CollectionPage: NextPage = () => {
                                 color="primary"
                                 onClick={resetErrorBoundary}
                               >
-                                <FormattedMessage
-                                  id="try.again"
-                                  defaultMessage="Try again"
-                                  description="Try again"
-                                />
+                                {intl.formatMessage({
+                                  id: "try.again",
+                                  defaultMessage: "Try again",
+                                  description: "Try again"
+                                })}
                               </Button>
                             </Stack>
                           )}

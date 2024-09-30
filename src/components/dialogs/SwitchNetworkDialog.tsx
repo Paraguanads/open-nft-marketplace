@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import {
   Alert,
   Button,
@@ -9,7 +10,6 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { FormattedMessage } from 'react-intl';
 import { useSwitchNetworkMutation } from '../../hooks/blockchain';
 import { getChainName } from '../../utils/blockchain';
 import { AppDialogTitle } from '../AppDialogTitle';
@@ -20,6 +20,7 @@ interface Props {
 }
 
 export function SwitchNetworkDialog({ dialogProps, chainId }: Props) {
+  const intl = useIntl();
   const { onClose } = dialogProps;
 
   const switchNetworkMutation = useSwitchNetworkMutation();
@@ -40,24 +41,24 @@ export function SwitchNetworkDialog({ dialogProps, chainId }: Props) {
   return (
     <Dialog {...dialogProps}>
       <AppDialogTitle
-        title={
-          <FormattedMessage
-            id="switch.network"
-            defaultMessage="Switch network"
-            description="Switch network dialog title"
-          />
-        }
+        title={intl.formatMessage({
+          id: "switch.network",
+          defaultMessage: "Switch network",
+          description: "Switch network dialog title"
+        })}
         onClose={handleClose}
       />
       <DialogContent dividers>
         <Stack spacing={2}>
           <Typography variant="body1">
-            <FormattedMessage
-              id="switch.network.content.text"
-              defaultMessage="Please, switch to {chainName} network to create listings or offers for this asset"
-              description="Switch network dialog content text"
-              values={{ chainName: <b>{getChainName(chainId)}</b> }}
-            />
+            {intl.formatMessage(
+              {
+                id: "switch.network.content.text",
+                defaultMessage: "Please, switch to {chainName} network to create listings or offers for this asset",
+                description: "Switch network dialog content text"
+              },
+              { chainName: <b>{getChainName(chainId)}</b> }
+            )}
           </Typography>
           {switchNetworkMutation.isError && (
             <Alert severity="error" onClose={handleReset}>
@@ -78,21 +79,21 @@ export function SwitchNetworkDialog({ dialogProps, chainId }: Props) {
           }
           onClick={handleSwitchNetwork}
         >
-          <FormattedMessage
-            id="switch"
-            defaultMessage="Switch"
-            description="switch"
-          />
+          {intl.formatMessage({
+            id: "switch",
+            defaultMessage: "Switch",
+            description: "switch"
+          })}
         </Button>
         <Button
           disabled={switchNetworkMutation.isLoading}
           onClick={handleClose}
         >
-          <FormattedMessage
-            id="cancel"
-            defaultMessage="Cancel"
-            description="Cancel"
-          />
+          {intl.formatMessage({
+            id: "cancel",
+            defaultMessage: "Cancel",
+            description: "Cancel"
+          })}
         </Button>
       </DialogActions>
     </Dialog>

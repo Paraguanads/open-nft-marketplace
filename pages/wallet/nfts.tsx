@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { NextPage } from 'next';
 import { ChangeEvent, useState } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { useIntl } from 'react-intl';
 import MainLayout from '../../src/components/layouts/main';
 import { PageHeader } from '../../src/components/PageHeader';
 import SidebarFilters from '../../src/components/SidebarFilters';
@@ -22,6 +22,7 @@ import { ImportAssetDialog } from '../../src/modules/orders/components/dialogs/I
 const FavoritesPage: NextPage = () => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
+  const intl = useIntl();
 
   const [filters, setFilters] = useState({ myNfts: false });
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -39,7 +40,7 @@ const FavoritesPage: NextPage = () => {
   const renderSidebar = (onClose?: () => void) => {
     return (
       <SidebarFilters
-        title={<FormattedMessage id="filters" defaultMessage="Filters" />}
+        title={intl.formatMessage({ id: "filters", defaultMessage: "Filters" })}
         onClose={onClose}
       >
         <SidebarFiltersContent>
@@ -53,9 +54,7 @@ const FavoritesPage: NextPage = () => {
                     name="myNfts"
                   />
                 }
-                label={
-                  <FormattedMessage id="my.nfts" defaultMessage="My NFTs" />
-                }
+                label={intl.formatMessage({ id: "my.nfts", defaultMessage: "My NFTs" })}
               />
             </FormControl>
           </Stack>
@@ -106,24 +105,15 @@ const FavoritesPage: NextPage = () => {
                   <PageHeader
                     breadcrumbs={[
                       {
-                        caption: (
-                          <FormattedMessage id="home" defaultMessage="Home" />
-                        ),
+                        caption: intl.formatMessage({ id: "home", defaultMessage: "Home" }),
                         uri: '/',
                       },
                       {
-                        caption: (
-                          <FormattedMessage
-                            id="wallet"
-                            defaultMessage="Wallet"
-                          />
-                        ),
+                        caption: intl.formatMessage({ id: "wallet", defaultMessage: "Wallet" }),
                         uri: '/wallet',
                       },
                       {
-                        caption: (
-                          <FormattedMessage id="nfts" defaultMessage="NFTs" />
-                        ),
+                        caption: intl.formatMessage({ id: "nfts", defaultMessage: "NFTs" }),
                         uri: '/wallet/nfts',
                         active: true,
                       },

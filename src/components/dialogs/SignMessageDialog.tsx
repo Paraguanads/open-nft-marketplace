@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
@@ -11,7 +12,6 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { FormattedMessage } from 'react-intl';
 import CloseCircle from '../icons/CloseCircle';
 import ReceiptText from '../icons/ReceiptText';
 import TickCircle from '../icons/TickCircle';
@@ -29,6 +29,7 @@ export function SignMessageDialog({
   success,
   message,
 }: Props) {
+  const intl = useIntl();
   const { onClose } = dialogProps;
 
   const handleClose = () => onClose!({}, 'backdropClick');
@@ -40,7 +41,7 @@ export function SignMessageDialog({
           <CloseCircle color="error" fontSize="large" />
           <Box>
             <Typography align="center" variant="h5">
-              <FormattedMessage id="error" defaultMessage="Error" />
+              {intl.formatMessage({ id: "error", defaultMessage: "Error" })}
             </Typography>
             <Typography align="center" variant="body1" color="textSecondary">
               {error?.message}
@@ -58,17 +59,17 @@ export function SignMessageDialog({
           )}
           <Box>
             <Typography align="center" variant="h5">
-              <FormattedMessage
-                id="sign.message"
-                defaultMessage="Sign message"
-                description="Sign message "
-              />
+              {intl.formatMessage({
+                id: "sign.message",
+                defaultMessage: "Sign message",
+                description: "Sign message "
+              })}
             </Typography>
             <Typography align="center" variant="body1" color="textSecondary">
-              <FormattedMessage
-                id="confirm.sign.message"
-                defaultMessage="Please, sign the message on your wallet"
-              />
+              {intl.formatMessage({
+                id: "confirm.sign.message",
+                defaultMessage: "Please, sign the message on your wallet"
+              })}
             </Typography>
           </Box>
           <Typography align="center" variant="body2">
@@ -98,11 +99,11 @@ export function SignMessageDialog({
         >
           <ReceiptText />
           <Typography variant="inherit">
-            <FormattedMessage
-              id="sign.message"
-              defaultMessage="Sign Message"
-              description="Sign message dialog title"
-            />
+            {intl.formatMessage({
+              id: "sign.message",
+              defaultMessage: "Sign Message",
+              description: "Sign message dialog title"
+            })}
           </Typography>
         </Stack>
         {onClose && (

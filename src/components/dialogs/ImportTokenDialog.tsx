@@ -19,7 +19,7 @@ import {
 import { FormikHelpers, useFormik } from 'formik';
 import { useAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { NETWORKS } from '../../constants/chain';
 import { useTokenData } from '../../hooks/blockchain';
 import { AppDialogTitle } from '../AppDialogTitle';
@@ -62,12 +62,12 @@ const FormSchema: Yup.SchemaOf<Form> = Yup.object().shape({
 });
 
 function ImportTokenDialog({ dialogProps }: Props) {
+  const intl = useIntl();
   const { onClose } = dialogProps;
   const { chainId } = useWeb3React();
 
   const [tokens, setTokens] = useAtom(tokensAtom);
 
-  const { formatMessage } = useIntl();
   const { enqueueSnackbar } = useSnackbar();
 
   const handleSubmit = useCallback(
@@ -92,7 +92,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
         ]);
 
         enqueueSnackbar(
-          formatMessage({
+          intl.formatMessage({
             defaultMessage: 'Token added',
             id: 'token.added',
           }),
@@ -112,7 +112,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
         onClose({}, 'escapeKeyDown');
       }
     },
-    [tokens, enqueueSnackbar, onClose]
+    [tokens, enqueueSnackbar, onClose, intl]
   );
 
   const formik = useFormik<Form>({
@@ -195,7 +195,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
       if (token) {
         formik.setFieldError(
           'contractAddress',
-          formatMessage({
+          intl.formatMessage({
             id: 'token.already.imported',
             defaultMessage: 'Token already imported',
           })
@@ -212,13 +212,11 @@ function ImportTokenDialog({ dialogProps }: Props) {
   return (
     <Dialog {...dialogProps}>
       <AppDialogTitle
-        title={
-          <FormattedMessage
-            id="import.token"
-            defaultMessage="Import Token"
-            description="Import token dialog title"
-          />
-        }
+        title={intl.formatMessage({
+          id: "import.token",
+          defaultMessage: "Import Token",
+          description: "Import token dialog title"
+        })}
         onClose={handleClose}
       />
       <DialogContent dividers>
@@ -290,7 +288,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
             value={formik.values.contractAddress}
             onChange={formik.handleChange}
             name="contractAddress"
-            label={formatMessage({
+            label={intl.formatMessage({
               id: 'contract.address',
               defaultMessage: 'Contract address',
             })}
@@ -307,7 +305,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
             value={formik.values.name}
             onChange={formik.handleChange}
             name="name"
-            label={formatMessage({
+            label={intl.formatMessage({
               id: 'name',
               defaultMessage: 'Name',
             })}
@@ -318,7 +316,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
             value={formik.values.symbol}
             onChange={formik.handleChange}
             name="symbol"
-            label={formatMessage({
+            label={intl.formatMessage({
               id: 'symbol',
               defaultMessage: 'Symbol',
             })}
@@ -330,7 +328,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
             value={formik.values.decimals}
             onChange={formik.handleChange}
             name="decimals"
-            label={formatMessage({
+            label={intl.formatMessage({
               id: 'decimals',
               defaultMessage: 'Decimals',
             })}
@@ -344,18 +342,18 @@ function ImportTokenDialog({ dialogProps }: Props) {
           variant="contained"
           color="primary"
         >
-          <FormattedMessage
-            id="import"
-            defaultMessage="Import"
-            description="Import"
-          />
+          {intl.formatMessage({
+            id: "import",
+            defaultMessage: "Import",
+            description: "Import"
+          })}
         </Button>
         <Button onClick={handleClose}>
-          <FormattedMessage
-            id="cancel"
-            defaultMessage="Cancel"
-            description="Cancel"
-          />
+          {intl.formatMessage({
+            id: "cancel",
+            defaultMessage: "Cancel",
+            description: "Cancel"
+          })}
         </Button>
       </DialogActions>
     </Dialog>

@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, Button, Container, Grid, Typography } from '@mui/material';
 import type { NextPage } from 'next';
@@ -5,11 +6,12 @@ import MainLayout from '../src/components/layouts/main';
 
 import Image from 'next/image';
 
-import { FormattedMessage } from 'react-intl';
 import catHeroImg from '../public/assets/images/cat-hero.svg';
 import Link from '../src/components/Link';
 
 const NotFound: NextPage = () => {
+  const intl = useIntl();
+
   return (
     <MainLayout>
       <Box sx={{ py: 8 }}>
@@ -28,17 +30,17 @@ const NotFound: NextPage = () => {
                 variant="body1"
                 color="primary"
               >
-                <FormattedMessage
-                  id="oop.page.not.found"
-                  defaultMessage="Oops, page not found"
-                />
+                {intl.formatMessage({
+                  id: "oop.page.not.found",
+                  defaultMessage: "Oops, page not found"
+                })}
               </Typography>
               <Typography
                 sx={{ textAlign: { sm: 'left', xs: 'center' } }}
                 variant="h1"
                 component="h1"
               >
-                <FormattedMessage id="error.404" defaultMessage="Error 404" />
+                {intl.formatMessage({ id: "error.404", defaultMessage: "Error 404" })}
               </Typography>
               <Box
                 sx={{
@@ -54,10 +56,10 @@ const NotFound: NextPage = () => {
                   variant="contained"
                   color="primary"
                 >
-                  <FormattedMessage
-                    id="back.to.home"
-                    defaultMessage="Back to Home"
-                  />
+                  {intl.formatMessage({
+                    id: "back.to.home",
+                    defaultMessage: "Back to Home"
+                  })}
                 </Button>
               </Box>
             </Grid>

@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import Container from '@mui/material/Container';
 import type { GetStaticProps, GetStaticPropsContext, NextPage } from 'next';
 import { useRouter } from 'next/router';
@@ -10,7 +11,6 @@ import { getAssetData, getAssetMetadata } from '../../../../src/services/nft';
 import { getProviderBySlug } from '../../../../src/services/providers';
 
 import { NextSeo } from 'next-seo';
-import { FormattedMessage } from 'react-intl';
 import { PageHeader } from '../../../../src/components/PageHeader';
 
 import {
@@ -26,6 +26,7 @@ import { getNetworkSlugFromChainId } from '../../../../src/utils/blockchain';
 import { truncateErc1155TokenId } from '../../../../src/utils/nfts';
 
 const AssetDetailPage: NextPage = () => {
+  const intl = useIntl();
   const router = useRouter();
 
   const { address, id } = router.query;
@@ -48,7 +49,7 @@ const AssetDetailPage: NextPage = () => {
             <PageHeader
               breadcrumbs={[
                 {
-                  caption: <FormattedMessage id="home" defaultMessage="Home" />,
+                  caption: intl.formatMessage({ id: "home", defaultMessage: "Home" }),
                   uri: '/',
                 },
                 {

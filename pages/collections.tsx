@@ -1,7 +1,7 @@
 import { Container, Grid } from '@mui/material';
 import type { GetStaticProps, GetStaticPropsContext, NextPage } from 'next';
 import { NextSeo } from 'next-seo';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { dehydrate, QueryClient } from 'react-query';
 import collectionListJson from '../config/default.collectionlist.json';
 import MainLayout from '../src/components/layouts/main';
@@ -15,12 +15,12 @@ import { getProviderByChainId } from '../src/utils/blockchain';
 const appConfig = getAppConfig();
 
 const Collections: NextPage = () => {
-  const { formatMessage } = useIntl();
+  const intl = useIntl();
 
   return (
     <>
       <NextSeo
-        title={formatMessage({
+        title={intl.formatMessage({
           id: 'collections',
           defaultMessage: 'Collections',
         })}
@@ -32,18 +32,11 @@ const Collections: NextPage = () => {
               <PageHeader
                 breadcrumbs={[
                   {
-                    caption: (
-                      <FormattedMessage id="home" defaultMessage="Home" />
-                    ),
+                    caption: intl.formatMessage({ id: "home", defaultMessage: "Home" }),
                     uri: '/',
                   },
                   {
-                    caption: (
-                      <FormattedMessage
-                        id="collections"
-                        defaultMessage="Collections"
-                      />
-                    ),
+                    caption: intl.formatMessage({ id: "collections", defaultMessage: "Collections" }),
                     uri: '/collections',
                     active: true,
                   },

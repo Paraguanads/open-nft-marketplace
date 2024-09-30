@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import {
   Alert,
   Avatar,
@@ -17,7 +18,6 @@ import {
   Stack,
 } from '@mui/material';
 import { useState } from 'react';
-import { FormattedMessage } from 'react-intl';
 import { NETWORKS } from '../../constants/chain';
 import { useSwitchNetworkMutation } from '../../hooks/blockchain';
 import { Network } from '../../types/chains';
@@ -28,6 +28,7 @@ interface Props {
 }
 
 function SwitchNetworkDialog({ dialogProps }: Props) {
+  const intl = useIntl();
   const { onClose } = dialogProps;
 
   const [chainId, setChainId] = useState<number>();
@@ -68,13 +69,11 @@ function SwitchNetworkDialog({ dialogProps }: Props) {
   return (
     <Dialog {...dialogProps}>
       <AppDialogTitle
-        title={
-          <FormattedMessage
-            id="switch.network"
-            defaultMessage="Switch Network"
-            description="Switch network dialog title"
-          />
-        }
+        title={intl.formatMessage({
+          id: "switch.network",
+          defaultMessage: "Switch Network",
+          description: "Switch network dialog title"
+        })}
         onClose={handleClose}
       />
       <DialogContent dividers sx={{ p: 0 }}>
@@ -144,21 +143,21 @@ function SwitchNetworkDialog({ dialogProps }: Props) {
           }
           onClick={handleSwitchNetwork}
         >
-          <FormattedMessage
-            id="switch"
-            defaultMessage="Switch"
-            description="switch"
-          />
+          {intl.formatMessage({
+            id: "switch",
+            defaultMessage: "Switch",
+            description: "switch"
+          })}
         </Button>
         <Button
           disabled={switchNetworkMutation.isLoading}
           onClick={handleClose}
         >
-          <FormattedMessage
-            id="cancel"
-            defaultMessage="Cancel"
-            description="Cancel"
-          />
+          {intl.formatMessage({
+            id: "cancel",
+            defaultMessage: "Cancel",
+            description: "Cancel"
+          })}
         </Button>
       </DialogActions>
     </Dialog>

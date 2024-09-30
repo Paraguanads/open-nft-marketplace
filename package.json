@@ -36,6 +36,7 @@
     "ethers": "^5.6.4",
     "formik": "^2.2.9",
     "jotai": "^1.6.5",
+    "jotai-optics": "^0.2.0",
     "moment": "^2.29.3",
     "next": "^12.1.5",
     "next-seo": "^5.4.0",
@@ -50,7 +51,8 @@
     "react-markdown": "^8.0.5",
     "react-query": "^3.34.19",
     "remark-gfm": "^3.0.1",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "zustand": "^5.0.0-rc.2"
   },
   "devDependencies": {
     "@formatjs/cli": "^4.8.3",

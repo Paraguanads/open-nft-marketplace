@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import {
   Button,
   Dialog,
@@ -13,7 +14,6 @@ import {
 } from '@mui/material';
 import { useAtom } from 'jotai';
 import { useState } from 'react';
-import { FormattedMessage } from 'react-intl';
 import { CURRENCIES } from '../../constants';
 import { currencyAtom } from '../../state/atoms';
 import { Currency } from '../../types/app';
@@ -24,6 +24,7 @@ interface Props {
 }
 
 function SelectCurrencyDialog({ dialogProps }: Props) {
+  const intl = useIntl();
   const { onClose } = dialogProps;
 
   const [currency, setCurrency] = useAtom(currencyAtom);
@@ -48,13 +49,11 @@ function SelectCurrencyDialog({ dialogProps }: Props) {
   return (
     <Dialog {...dialogProps} onClose={handleClose}>
       <AppDialogTitle
-        title={
-          <FormattedMessage
-            id="select.currency"
-            defaultMessage="Select currency"
-            description="Select currency"
-          />
-        }
+        title={intl.formatMessage({
+          id: "select.currency",
+          defaultMessage: "Select currency",
+          description: "Select currency"
+        })}
         onClose={handleClose}
       />
       <DialogContent dividers sx={{ p: 0 }}>
@@ -84,18 +83,18 @@ function SelectCurrencyDialog({ dialogProps }: Props) {
           color="primary"
           onClick={handleConfirmSelect}
         >
-          <FormattedMessage
-            id="Confirm"
-            defaultMessage="Confirm"
-            description="Confirm"
-          />
+          {intl.formatMessage({
+            id: "Confirm",
+            defaultMessage: "Confirm",
+            description: "Confirm"
+          })}
         </Button>
         <Button onClick={handleClose}>
-          <FormattedMessage
-            id="cancel"
-            defaultMessage="Cancel"
-            description="Cancel"
-          />
+          {intl.formatMessage({
+            id: "cancel",
+            defaultMessage: "Cancel",
+            description: "Cancel"
+          })}
         </Button>
       </DialogActions>
     </Dialog>
