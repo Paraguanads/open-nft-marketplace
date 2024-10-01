@@ -4,7 +4,7 @@ import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import * as React from 'react';
-import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
+import { Hydrate, QueryClient, QueryClientProvider, DehydratedState } from 'react-query';
 import createEmotionCache from '../src/createEmotionCache';
 import { getTheme } from '../src/theme';
 
@@ -41,13 +41,14 @@ const clientSideEmotionCache = createEmotionCache();
 
 interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache;
+  pageProps: {
+    dehydratedState?: DehydratedState;
+  } & AppProps['pageProps'];
 }
 
 const appConfig = getAppConfig();
 
-export default function MyApp(props: MyAppProps) {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
-
+export default function MyApp({ Component, emotionCache = clientSideEmotionCache, pageProps }: MyAppProps) {
   const theme = React.useMemo(() => {
     const tempTheme = getTheme(appConfig.theme);
     return responsiveFontSizes(tempTheme);
