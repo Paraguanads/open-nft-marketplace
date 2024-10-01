@@ -53,6 +53,7 @@ import {
 } from '../../../utils/blockchain';
 import { ipfsUriToUrl } from '../../../utils/ipfs';
 import { OrderPageActions } from './OrderPageActions';
+import Image from 'next/image';
 
 interface Props {
   order?: OrderBookItem;
@@ -491,9 +492,11 @@ function OrderRightSection({ order }: Props) {
               spacing={0.5}
             >
               <Tooltip title={token?.name || ''}>
-                <img
-                  alt={token?.name}
+                <Image
+                  alt={token?.name || ''}
                   src={ipfsUriToUrl(token?.logoURI || '')}
+                  width={16}
+                  height={16}
                   style={{ width: 'auto', height: '1rem' }}
                 />
               </Tooltip>

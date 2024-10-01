@@ -82,7 +82,7 @@ export function ConfirmBuyDialog({
     }
 
     return false;
-  }, [erc20Balance, tokens, order]);
+  }, [erc20Balance.data, order?.erc20TokenAmount, token]);
 
   const coinPricesQuery = useCoinPricesQuery({ includeNative: true });
 
@@ -90,7 +90,7 @@ export function ConfirmBuyDialog({
     if (token && currency && order) {
       if (coinPricesQuery?.data) {
         const ratio =
-          coinPricesQuery.data[token.address.toLowerCase()][currency];
+          coinPricesQuery.data[token.address.toLowerCase()]?.[currency];
 
         if (ratio) {
           return (
@@ -104,7 +104,7 @@ export function ConfirmBuyDialog({
         }
       }
     }
-  }, [token, coinPricesQuery, currency, order]);
+  }, [token, currency, order, coinPricesQuery?.data]);
 
   return (
     <Dialog {...dialogProps}>
@@ -130,15 +130,17 @@ export function ConfirmBuyDialog({
                     sx={{ paddingTop: '100%', width: '100%' }}
                   />
                 ) : (
-                  <Image
-                    width="100%"
-                    height="100%"
-                    alt={formatMessage({
-                      id: 'nft.image',
-                      defaultMessage: 'NFT Image',
-                    })}
-                    src={ipfsUriToUrl(metadata?.image)}
-                  />
+                  <Box sx={{ position: 'relative', width: '100px', height: '100px' }}>
+                    <Image
+                      layout="fill"
+                      objectFit="contain"
+                      alt={formatMessage({
+                        id: 'nft.image',
+                        defaultMessage: 'NFT Image',
+                      })}
+                      src={ipfsUriToUrl(metadata?.image)}
+                    />
+                  </Box>
                 )}
               </Grid>
               <Grid item xs>
@@ -173,11 +175,14 @@ export function ConfirmBuyDialog({
                       spacing={0.5}
                     >
                       <Tooltip title={token?.name || ''}>
-                        <img
-                          alt={token?.name}
-                          src={ipfsUriToUrl(token?.logoURI || '')}
-                          style={{ width: 'auto', height: '1rem' }}
-                        />
+                        <Box sx={{ position: 'relative', width: '16px', height: '16px' }}>
+                          <Image
+                            layout="fill"
+                            objectFit="contain"
+                            alt={token?.name || ''}
+                            src={ipfsUriToUrl(token?.logoURI || '')}
+                          />
+                        </Box>
                       </Tooltip>
                       <Typography sx={{ fontWeight: 600 }} variant="body1">
                         {utils.formatUnits(
@@ -234,11 +239,14 @@ export function ConfirmBuyDialog({
                 alignContent="center"
               >
                 <Tooltip title={token?.name || ''}>
-                  <img
-                    alt={token?.name}
-                    src={ipfsUriToUrl(token?.logoURI || '')}
-                    style={{ width: 'auto', height: '1rem' }}
-                  />
+                  <Box sx={{ position: 'relative', width: '16px', height: '16px' }}>
+                    <Image
+                      layout="fill"
+                      objectFit="contain"
+                      alt={token?.name || ''}
+                      src={ipfsUriToUrl(token?.logoURI || '')}
+                    />
+                  </Box>
                 </Tooltip>
                 <Typography sx={{ fontWeight: 600 }} variant="body1">
                   {erc20Balance.isLoading ? (

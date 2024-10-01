@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { FormikHelpers, useFormik } from 'formik';
 import { useAtom } from 'jotai';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import { NETWORKS } from '../../constants/chain';
 import { useTokenData } from '../../hooks/blockchain';
@@ -48,19 +48,6 @@ interface Form {
   decimals: number;
 }
 
-const FormSchema: Yup.SchemaOf<Form> = Yup.object().shape({
-  chainId: Yup.number().required(),
-  contractAddress: Yup.string()
-    .test('address', (value) => {
-      return value !== undefined ? ethers.utils.isAddress(value) : true;
-    })
-    .required(),
-
-  name: Yup.string().required(),
-  symbol: Yup.string().required(),
-  decimals: Yup.number().required(),
-});
-
 function ImportTokenDialog({ dialogProps }: Props) {
   const intl = useIntl();
   const { onClose } = dialogProps;
@@ -69,6 +56,19 @@ function ImportTokenDialog({ dialogProps }: Props) {
   const [tokens, setTokens] = useAtom(tokensAtom);
 
   const { enqueueSnackbar } = useSnackbar();
+
+  const FormSchema = useMemo(() => Yup.object().shape({
+    chainId: Yup.number().required(),
+    contractAddress: Yup.string()
+      .test('address', (value) => {
+        return value !== undefined ? ethers.utils.isAddress(value) : true;
+      })
+      .required(),
+
+    name: Yup.string().required(),
+    symbol: Yup.string().required(),
+    decimals: Yup.number().required(),
+  }), []);
 
   const handleSubmit = useCallback(
     (values: Form, formikHelpers: FormikHelpers<Form>) => {
@@ -82,7 +82,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
         setTokens((value) => [
           ...value,
           {
-            address: values.contractAddress.toLocaleLowerCase(),
+            address: values.contractAddress.toLowerCase(),
             chainId: values.chainId,
             decimals: values.decimals || 0,
             logoURI: '',
@@ -112,12 +112,12 @@ function ImportTokenDialog({ dialogProps }: Props) {
         onClose({}, 'escapeKeyDown');
       }
     },
-    [tokens, enqueueSnackbar, onClose, intl]
+    [tokens, setTokens, enqueueSnackbar, onClose, intl]
   );
 
   const formik = useFormik<Form>({
     initialValues: {
-      chainId: 1,
+      chainId: chainId || 1,
       contractAddress: '',
       name: '',
       decimals: 0,
@@ -128,72 +128,57 @@ function ImportTokenDialog({ dialogProps }: Props) {
   });
 
   useEffect(() => {
-    if (chainId !== undefined) {
-      formik.setFormikState((value) => ({
-        ...value,
-        values: { ...value.values, chainId },
-      }));
+    if (chainId !== undefined && chainId !== formik.values.chainId) {
+      formik.setFieldValue('chainId', chainId);
     }
-  }, [chainId]);
+  }, [chainId, formik.values.chainId]);
 
   const lazyAddress = useDebounce<string>(formik.values.contractAddress, 500);
 
+  const onTokenDataSuccess = useCallback(({
+    decimals,
+    name,
+    symbol,
+  }: {
+    decimals: number;
+    name: string;
+    symbol: string;
+  }) => {
+    formik.setValues(
+      (value) => ({
+        ...value,
+        name: name || '',
+        decimals: decimals || 0,
+        symbol: symbol || '',
+      }),
+      true
+    );
+  }, [formik]);
+
   const tokenData = useTokenData({
-    onSuccess: ({
-      decimals,
-      name,
-      symbol,
-    }: {
-      decimals: number;
-      name: string;
-      symbol: string;
-    }) => {
-      formik.setValues(
-        (value) => ({
-          ...value,
-          name: name || '',
-          decimals: decimals || 0,
-          symbol: symbol || '',
-        }),
-        true
-      );
-    },
+    onSuccess: onTokenDataSuccess,
     onError: (err: AxiosError) => {
-      formik.resetForm({
-        values: {
-          contractAddress: '',
-          name: '',
-          decimals: 0,
-          symbol: '',
-          chainId: chainId || 1,
-        },
-      });
+      formik.setFieldValue('name', '');
+      formik.setFieldValue('decimals', 0);
+      formik.setFieldValue('symbol', '');
     },
   });
 
-  const handleSubmitForm = () => {
-    formik.submitForm();
-  };
+  const { handleChange, values, setFieldError } = formik;
 
-  const handleClose = () => {
-    if (onClose) {
-      onClose({}, 'backdropClick');
-    }
-    formik.resetForm();
-  };
+  const handleAddressChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const address = event.target.value;
+    handleChange(event);
 
-  const handleCloseError = () => tokenData.reset();
-
-  useEffect(() => {
-    if (lazyAddress !== '') {
+    if (address && ethers.utils.isAddress(address)) {
       const token = tokens.find(
         (t) =>
-          t.chainId === formik.values.chainId &&
-          isAddressEqual(lazyAddress, t.address)
+          t.chainId === values.chainId &&
+          isAddressEqual(address, t.address)
       );
 
       if (token) {
-        formik.setFieldError(
+        setFieldError(
           'contractAddress',
           intl.formatMessage({
             id: 'token.already.imported',
@@ -202,12 +187,25 @@ function ImportTokenDialog({ dialogProps }: Props) {
         );
       } else {
         tokenData.mutate({
-          chainId: formik.values.chainId,
-          address: lazyAddress,
+          chainId: values.chainId,
+          address,
         });
       }
     }
-  }, [lazyAddress, formik.values.chainId]);
+  }, [handleChange, values.chainId, setFieldError, tokens, intl, tokenData]);
+
+  const handleSubmitForm = () => {
+    formik.submitForm();
+  };
+
+  const handleClose = useCallback(() => {
+    if (onClose) {
+      onClose({}, 'backdropClick');
+    }
+    formik.resetForm();
+  }, [onClose, formik]);
+
+  const handleCloseError = useCallback(() => tokenData.reset(), [tokenData]);
 
   return (
     <Dialog {...dialogProps}>
@@ -233,6 +231,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
               onChange={formik.handleChange}
               name="chainId"
               renderValue={(value) => {
+                const network = NETWORKS[value as keyof typeof NETWORKS] as Network;
                 return (
                   <Stack
                     direction="row"
@@ -241,22 +240,20 @@ function ImportTokenDialog({ dialogProps }: Props) {
                     spacing={1}
                   >
                     <Avatar
-                      src={ipfsUriToUrl(
-                        NETWORKS[formik.values.chainId].imageUrl || ''
-                      )}
+                      src={ipfsUriToUrl(network.imageUrl || '')}
                       style={{ width: 'auto', height: '1rem' }}
                     />
                     <Typography variant="body1">
-                      {NETWORKS[formik.values.chainId].name}
+                      {network.name}
                     </Typography>
                   </Stack>
                 );
               }}
             >
-              {Object.keys(NETWORKS)
-                .filter((key) => !NETWORKS[Number(key)].testnet)
-                .map((key: any, index: number) => (
-                  <MenuItem key={index} value={key}>
+              {Object.entries(NETWORKS)
+                .filter(([, network]) => !network.testnet)
+                .map(([key, network]) => (
+                  <MenuItem key={key} value={Number(key)}>
                     <ListItemIcon>
                       <Box
                         sx={{
@@ -268,9 +265,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
                         }}
                       >
                         <Avatar
-                          src={ipfsUriToUrl(
-                            (NETWORKS[key] as Network)?.imageUrl || ''
-                          )}
+                          src={ipfsUriToUrl(network.imageUrl || '')}
                           sx={{
                             width: 'auto',
                             height: '1rem',
@@ -278,7 +273,7 @@ function ImportTokenDialog({ dialogProps }: Props) {
                         />
                       </Box>
                     </ListItemIcon>
-                    <ListItemText primary={NETWORKS[key].name + index} />
+                    <ListItemText primary={network.name} />
                   </MenuItem>
                 ))}
             </Select>
@@ -286,18 +281,14 @@ function ImportTokenDialog({ dialogProps }: Props) {
           <TextField
             fullWidth
             value={formik.values.contractAddress}
-            onChange={formik.handleChange}
+            onChange={handleAddressChange}
             name="contractAddress"
             label={intl.formatMessage({
               id: 'contract.address',
               defaultMessage: 'Contract address',
             })}
             error={Boolean(formik.errors.contractAddress)}
-            helperText={
-              Boolean(formik.errors.contractAddress)
-                ? formik.errors.contractAddress
-                : undefined
-            }
+            helperText={formik.errors.contractAddress}
           />
           <TextField
             fullWidth

@@ -52,10 +52,7 @@ export type LinkProps = {
 
 // A styled version of the Next.js Link component:
 // https://nextjs.org/docs/api-reference/next/link
-const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(
-  props,
-  ref
-) {
+const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) {
   const {
     activeClassName = 'active',
     as,
@@ -102,14 +99,7 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(
   };
 
   if (noLinkStyle) {
-    return (
-      <NextLinkComposed
-        className={className}
-        ref={ref}
-        {...nextjsProps}
-        {...other}
-      />
-    );
+    return <NextLinkComposed className={className} ref={ref} {...nextjsProps} {...other} />;
   }
 
   return (

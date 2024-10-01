@@ -45,15 +45,16 @@ interface MyAppProps extends AppProps {
 
 const appConfig = getAppConfig();
 
-const tempTheme = getTheme(appConfig.theme);
-
-const theme = responsiveFontSizes(tempTheme);
-
 export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
+  const theme = React.useMemo(() => {
+    const tempTheme = getTheme(appConfig.theme);
+    return responsiveFontSizes(tempTheme);
+  }, []);
+
   const [queryClient] = React.useState(
-    new QueryClient({
+    () => new QueryClient({
       defaultOptions: {
         queries: {
           suspense: false,
@@ -62,7 +63,10 @@ export default function MyApp(props: MyAppProps) {
     })
   );
 
-  const getLayout = (Component as any).getLayout || ((page: any) => page);
+  const getLayout = React.useMemo(
+    () => (Component as any).getLayout || ((page: React.ReactNode) => page),
+    [Component]
+  );
 
   return (
     <CacheProvider value={emotionCache}>

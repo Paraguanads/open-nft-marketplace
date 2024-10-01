@@ -2,7 +2,6 @@ import { atom } from 'jotai';
 import { focusAtom } from 'jotai-optics';
 import { atomWithStorage } from 'jotai/utils';
 import { getAppConfig } from '../services/app';
-import { AppState } from '../types/app';
 import {
   Token,
   Transaction,
@@ -15,6 +14,18 @@ import { Asset } from '../types/nft';
 
 const appConfig = getAppConfig();
 
+interface AppState {
+  transactions: { [key: string]: Transaction };
+  tokens: Token[];
+  isBalancesVisible: boolean;
+  currency: string;
+  locale: string;
+  assets: { [key: string]: Asset };
+  favorites: {
+    assets: { [key: string]: Asset };
+  };
+}
+
 export const appStateAtom = atomWithStorage<AppState>('appState', {
   transactions: {},
   tokens: [],
@@ -22,20 +33,22 @@ export const appStateAtom = atomWithStorage<AppState>('appState', {
   currency: 'usd',
   locale: appConfig.locale || 'en-US',
   assets: {},
+  favorites: {
+    assets: {},
+  },
 });
 
-export const transactionsAtom = focusAtom<
-  AppState,
-  { [key: string]: Transaction },
-  void
->(appStateAtom, (o) => o.prop('transactions'));
+export const transactionsAtom = focusAtom<AppState, { [key: string]: Transaction }, void>(
+  appStateAtom,
+  (o) => o.prop('transactions')
+);
 
 export const isBalancesVisibleAtom = focusAtom<AppState, boolean, void>(
   appStateAtom,
   (o) => o.prop('isBalancesVisible')
 );
 
-export const pendingTransactionsAtom = atom<any, any>(
+export const pendingTransactionsAtom = atom(
   (get) => {
     const transactions = get(transactionsAtom);
 
@@ -49,7 +62,7 @@ export const pendingTransactionsAtom = atom<any, any>(
 
     return pendingTxs;
   },
-  (get, set, arg) => {
+  (get, set, arg: { [key: string]: Transaction }) => {
     return set(transactionsAtom, arg);
   }
 );
@@ -108,3 +121,11 @@ export const showSelectCurrencyAtom = atom<boolean>(false);
 export const showSelectLocaleAtom = atom<boolean>(false);
 
 export const drawerIsOpenAtom = atom(false);
+
+export const favoritesAtom = focusAtom(appStateAtom, (o) => o.prop('favorites'));
+
+export const favoriteAssetsAtom = atom((get) => {
+  const favorites = get(favoritesAtom);
+  const favoriteAssets = Object.keys(favorites?.assets ?? {});
+  return favoriteAssets.map((key) => favorites?.assets?.[key]).filter(Boolean);
+});

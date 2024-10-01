@@ -52,7 +52,7 @@ interface Form {
   tokenId: string;
 }
 
-const FormSchema: Yup.SchemaOf<Form> = Yup.object().shape({
+const FormSchema: Yup.ObjectSchema<Form> = Yup.object().shape({
   contractAddress: Yup.string()
     .test('address', (value) => {
       return value !== undefined ? utils.isAddress(value) : true;
@@ -268,10 +268,9 @@ export function ImportAssetDialog({ dialogProps }: Props) {
                       }}
                     >
                       <Image
-                        alt={metadata?.name}
+                        alt={metadata?.name || ''}
                         src={ipfsUriToUrl(metadata?.image || '')}
-                        height="100%"
-                        width="100%"
+                        layout="fill"
                         objectFit="contain"
                       />
                     </Box>

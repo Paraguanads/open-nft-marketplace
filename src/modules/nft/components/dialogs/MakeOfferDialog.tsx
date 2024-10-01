@@ -54,7 +54,7 @@ interface Form {
   expiry: Date;
 }
 
-const FormSchema: Yup.SchemaOf<Form> = Yup.object().shape({
+const FormSchema: Yup.ObjectSchema<Form> = Yup.object().shape({
   price: Yup.string().required(),
   tokenAddress: Yup.string().required(),
   expiry: Yup.date().required(),
@@ -178,11 +178,11 @@ export function MakeOfferDialog({ dialogProps, onConfirm, asset }: Props) {
 
     if (token.logoURI) {
       return (
-        <img
-          alt={token.name}
+        <Image
+          alt={token.name || ''}
           src={ipfsUriToUrl(token.logoURI || '')}
-          width="auto"
-          height={theme.spacing(2)}
+          width={32}
+          height={32}
         />
       );
     } else {
@@ -193,11 +193,11 @@ export function MakeOfferDialog({ dialogProps, onConfirm, asset }: Props) {
 
       if (imageUrl) {
         return (
-          <img
-            alt={token.name}
+          <Image
+            alt={token.name || ''}
             src={imageUrl}
-            width="auto"
-            height={theme.spacing(2)}
+            width={32}
+            height={32}
           />
         );
       } else {
@@ -240,10 +240,9 @@ export function MakeOfferDialog({ dialogProps, onConfirm, asset }: Props) {
                       }}
                     >
                       <Image
-                        alt={metadata?.name}
+                        alt={metadata?.name || ''}
                         src={ipfsUriToUrl(metadata?.image || '')}
-                        height="100%"
-                        width="100%"
+                        layout="fill"
                         objectFit="contain"
                       />
                     </Box>

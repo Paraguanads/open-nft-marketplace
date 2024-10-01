@@ -90,27 +90,37 @@ const MainLayout: React.FC<Props> = ({ children, noSsr, disablePadding }) => {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      connector.activate();
+    if (typeof window !== 'undefined' && connector) {
+      const activateConnector = async () => {
+        try {
+          await connector.activate();
+        } catch (error) {
+          console.error('Failed to activate connector:', error);
+        }
+      };
+
+      activateConnector();
+
       const handleNetworkChange = (newNetwork: any, oldNetwork: any) => {
         // When a Provider makes its initial connection, it emits a "network"
         // event with a null oldNetwork along with the newNetwork. So, if the
         // oldNetwork exists, it represents a changing network
-
-        window.location.reload();
+        if (oldNetwork) {
+          window.location.reload();
+        }
       };
 
-      connector?.provider?.on('chainChanged', handleNetworkChange);
+      if (connector.provider && typeof connector.provider.on === 'function') {
+        connector.provider.on('chainChanged', handleNetworkChange);
 
-      return () => {
-        connector?.provider?.removeListener(
-          'chainChanged',
-          handleNetworkChange
-        );
-      };
+        return () => {
+          if (connector.provider && typeof connector.provider.removeListener === 'function') {
+            connector.provider.removeListener('chainChanged', handleNetworkChange);
+          }
+        };
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [connector]);
 
   const [isDrawerOpen, setIsDrawerOpen] = useAtom(drawerIsOpenAtom);
 

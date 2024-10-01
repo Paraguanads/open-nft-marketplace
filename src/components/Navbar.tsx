@@ -41,8 +41,7 @@ import Link from './Link';
 
 import { Language } from '@mui/icons-material';
 import AttachMoney from '@mui/icons-material/AttachMoney';
-import { useAtom, useAtomValue } from 'jotai';
-import { useUpdateAtom } from 'jotai/utils';
+import { useAtom } from 'jotai';
 import { useIntl } from 'react-intl';
 import { useConnectWalletDialog } from '../hooks/app';
 import { useSelectNetworkDialog } from '../hooks/misc';
@@ -74,7 +73,7 @@ function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const isBalancesVisible = useAtomValue(isBalancesVisibleAtom);
+  const [isBalancesVisible] = useAtom(isBalancesVisibleAtom);
 
   const connectWalletDialog = useConnectWalletDialog();
 
@@ -96,15 +95,15 @@ function Navbar() {
     setMenuOpen(false);
   };
 
-  const hasPendingTransactions = useAtomValue(hasPendingTransactionsAtom);
+  const [hasPendingTransactions] = useAtom(hasPendingTransactionsAtom);
 
-  const uncheckedTransactions = useAtomValue(uncheckedTransactionsAtom);
+  const [uncheckedTransactions] = useAtom(uncheckedTransactionsAtom);
 
-  const [showSelectCurrency, setShowShowSelectCurrency] = useAtom(
+  const [showSelectCurrency, setShowSelectCurrency] = useAtom(
     showSelectCurrencyAtom
   );
 
-  const [showSelectLocale, setShowShowSelectLocale] =
+  const [showSelectLocale, setShowSelectLocale] =
     useAtom(showSelectLocaleAtom);
 
   const filteredUncheckedTransactions = useMemo(() => {
@@ -116,7 +115,7 @@ function Navbar() {
   const handleOpenTransactions = () => setShowTransactions(true);
   const handleCloseNotifications = () => setShowTransactions(false);
 
-  const setIsDrawerOpen = useUpdateAtom(drawerIsOpenAtom);
+  const [isDrawerOpen, setIsDrawerOpen] = useAtom(drawerIsOpenAtom);
 
   const handleToggleDrawer = () => setIsDrawerOpen((value) => !value);
 
@@ -139,17 +138,17 @@ function Navbar() {
   };
 
   const handleShowSelectCurrencyDialog = () => {
-    setShowShowSelectCurrency(true);
+    setShowSelectCurrency(true);
     handleSettingsMenuClose();
   };
 
   const handleShowSelectLocaleDialog = () => {
-    setShowShowSelectLocale(true);
+    setShowSelectLocale(true);
     handleSettingsMenuClose();
   };
 
-  const currency = useAtomValue(currencyAtom);
-  const locale = useAtomValue(localeAtom);
+  const [currency] = useAtom(currencyAtom);
+  const [locale] = useAtom(localeAtom);
 
   const intl = useIntl();
 
@@ -279,11 +278,14 @@ function Navbar() {
           ) : (
             <Link
               sx={{ textDecoration: 'none' }}
-              variant="h6"
-              color="primary"
               href="/"
             >
-              {appConfig.name}
+              <Typography
+                variant="h6"
+                color="primary"
+              >
+                {appConfig.name}
+              </Typography>
             </Link>
           )}
 
@@ -313,7 +315,9 @@ function Navbar() {
                 href="/"
                 sx={{ fontWeight: 600, textDecoration: 'none' }}
               >
-                {intl.formatMessage({ id: "home", defaultMessage: "Home" })}
+                <Typography>
+                  {intl.formatMessage({ id: "home", defaultMessage: "Home" })}
+                </Typography>
               </Link>
               {isActive && (
                 <Link
@@ -321,7 +325,9 @@ function Navbar() {
                   href="/wallet"
                   sx={{ fontWeight: 600, textDecoration: 'none' }}
                 >
-                  {intl.formatMessage({ id: "wallet", defaultMessage: "Wallet" })}
+                  <Typography>
+                    {intl.formatMessage({ id: "wallet", defaultMessage: "Wallet" })}
+                  </Typography>
                 </Link>
               )}
             </Stack>

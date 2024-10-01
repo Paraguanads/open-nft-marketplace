@@ -29,8 +29,13 @@ const ConnectWallet: NextPage = () => {
 
   const handleActivateWallet = async (connectorName: string) => {
     setConnectorName(connectorName);
-    await walletActivate.mutateAsync({ connectorName });
-    setConnectorName(undefined);
+    try {
+      await walletActivate.mutateAsync({ connectorName });
+    } catch (error) {
+      console.error('Error activating wallet:', error);
+    } finally {
+      setConnectorName(undefined);
+    }
   };
 
   return (

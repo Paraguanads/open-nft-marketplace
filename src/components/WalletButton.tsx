@@ -14,6 +14,8 @@ import { useCallback, useState } from 'react';
 import { isBalancesVisibleAtom } from '../state/atoms';
 import { getWalletIcon, truncateAddress } from '../utils/blockchain';
 import { useIntl } from 'react-intl';
+import { metaMask } from '../connectors/metamask';
+import { handleWalletConnectDisconnect } from '../connectors/walletConnect';
 
 interface Props {
   align?: 'center' | 'left';
@@ -21,10 +23,10 @@ interface Props {
 
 export function WalletButton(props: Props) {
   const { align } = props;
-  const { connector, account, ENSName } = useWeb3React();
-  const [anchorEl, setAnchorEl] = useState(null);
+  const { connector, account, ENSName, chainId } = useWeb3React();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event: any) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
@@ -35,10 +37,22 @@ export function WalletButton(props: Props) {
 
   const justifyContent = align === 'left' ? 'flex-start' : 'center';
 
-  const handleLogoutWallet = useCallback(() => {
-    if (connector?.deactivate) {
-      connector.deactivate();
+  const handleLogoutWallet = useCallback(async () => {
+    if (connector) {
+      if (typeof connector.deactivate === 'function') {
+        await connector.deactivate();
+      } else if (typeof connector.resetState === 'function') {
+        await connector.resetState();
+      }
     }
+
+    if (connector === metaMask) {
+      await metaMask.resetState();
+    }
+
+    handleClose();
+
+
   }, [connector]);
 
   const intl = useIntl();
@@ -66,15 +80,13 @@ export function WalletButton(props: Props) {
           />
           <Typography variant="body1">
             {isBalancesVisible
-              ? ENSName
-                ? ENSName
-                : truncateAddress(account)
+              ? ENSName || truncateAddress(account)
               : '**********'}
           </Typography>
         </Stack>
       </ButtonBase>
       <Menu
-        id="wallet-menuu"
+        id="wallet-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}

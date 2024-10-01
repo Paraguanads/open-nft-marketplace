@@ -29,9 +29,19 @@ export function useIsBalanceVisible() {
 export function useWalletActivate() {
   return useMutation(async ({ connectorName }: { connectorName: string }) => {
     if (connectorName === 'metamask') {
-      return await metaMask.activate();
+      if (metaMask && typeof metaMask.activate === 'function') {
+        return await metaMask.activate();
+      } else {
+        throw new Error('MetaMask connector is not properly initialized');
+      }
     } else if (connectorName === 'walletConnect') {
-      return await walletConnect.activate();
+      if (walletConnect && typeof walletConnect.activate === 'function') {
+        return await walletConnect.activate();
+      } else {
+        throw new Error('WalletConnect connector is not properly initialized');
+      }
+    } else {
+      throw new Error('Unknown connector name');
     }
   });
 }

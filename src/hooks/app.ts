@@ -1,7 +1,6 @@
 import { useWeb3React } from '@web3-react/core';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useSetAtom } from 'jotai';
 
-import { useUpdateAtom } from 'jotai/utils';
 import { useCallback } from 'react';
 import { getAppConfig } from '../services/app';
 import {
@@ -16,7 +15,7 @@ import {
 import { AppConfig } from '../types/config';
 
 export function useTransactions() {
-  const updateTransactions = useUpdateAtom(transactionsAtom);
+  const setTransactions = useSetAtom(transactionsAtom);
 
   const [isOpen, setDialogIsOpen] = useAtom(transactionDialogOpenAtom);
   const [hash, setHash] = useAtom(transactionDialogHashAtom);
@@ -41,7 +40,7 @@ export function useTransactions() {
         setType(undefined);
       }
     },
-    []
+    [setDialogIsOpen, setType, setMetadata, setHash]
   );
 
   const setDialogError = useCallback(
@@ -56,7 +55,7 @@ export function useTransactions() {
       if (chainId !== undefined) {
         setHash(hash);
 
-        updateTransactions((txs) => ({
+        setTransactions((txs) => ({
           ...txs,
           [hash]: {
             chainId,
@@ -69,7 +68,7 @@ export function useTransactions() {
         }));
       }
     },
-    [chainId]
+    [chainId, setHash, setTransactions]
   );
 
   return {

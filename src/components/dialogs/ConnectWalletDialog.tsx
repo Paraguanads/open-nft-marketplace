@@ -42,9 +42,14 @@ function ConnectWalletDialog({ dialogProps }: Props) {
 
   const handleActivateWallet = async (connectorName: string) => {
     setConnectorName(connectorName);
-    await walletActivate.mutateAsync({ connectorName });
-    handelClose();
-    setConnectorName(undefined);
+    try {
+      await walletActivate.mutateAsync({ connectorName });
+      handelClose();
+    } catch (error) {
+      console.error('Error activating wallet:', error);
+    } finally {
+      setConnectorName(undefined);
+    }
   };
 
   return (

@@ -50,18 +50,16 @@ interface Form {
   price: string;
   tokenAddress: string;
   expiry: Date;
-  taker?: string;
+  taker?: string | null;
 }
 
-const FormSchema: Yup.SchemaOf<Form> = Yup.object().shape({
+const FormSchema: Yup.ObjectSchema<Form> = Yup.object().shape({
   price: Yup.string().required(),
   tokenAddress: Yup.string().required(),
   expiry: Yup.date().required(),
-  taker: Yup.string()
-    .test('address', (value) => {
-      return value !== undefined ? utils.isAddress(value) : true;
-    })
-    .notRequired(),
+  taker: Yup.string().nullable().test('address', (value) => {
+    return value === null || value === undefined || utils.isAddress(value);
+  }),
 });
 
 interface Props {
@@ -113,7 +111,7 @@ export function MakeListingDialog({
         utils.parseUnits(values.price, decimals),
         values.tokenAddress,
         values.expiry || null,
-        values.taker
+        values.taker || undefined
       );
 
       formikHelpers.resetForm();
@@ -186,15 +184,14 @@ export function MakeListingDialog({
                     <Box
                       sx={{
                         position: 'relative',
-                        height: '100%',
-                        width: '100%',
+                        height: '100px',
+                        width: '100px',
                       }}
                     >
                       <Image
-                        alt={metadata?.name}
+                        alt={tokenSelected?.name || 'Token image'}
                         src={ipfsUriToUrl(metadata?.image || '')}
-                        height="100%"
-                        width="100%"
+                        layout="fill"
                         objectFit="contain"
                       />
                     </Box>
@@ -236,10 +233,11 @@ export function MakeListingDialog({
                             alignContent="center"
                             spacing={1}
                           >
-                            <img
-                              alt={tokenSelected?.name}
+                            <Image
+                              alt={tokenSelected?.name || 'Token image'}
                               src={ipfsUriToUrl(tokenSelected?.logoURI || '')}
-                              style={{ width: 'auto', height: '1rem' }}
+                              width={16}
+                              height={16}
                             />
                             <Box>
                               <Typography variant="body1">
@@ -253,10 +251,11 @@ export function MakeListingDialog({
                       {tokenList.map((token: Token, index: number) => (
                         <MenuItem value={token.address} key={index}>
                           <ListItemIcon>
-                            <img
-                              alt={token.name}
+                            <Image
+                              alt={token.name || 'Token image'}
                               src={ipfsUriToUrl(token.logoURI || '')}
-                              style={{ width: 'auto', height: '1rem' }}
+                              width={16}
+                              height={16}
                             />
                           </ListItemIcon>
                           <ListItemText

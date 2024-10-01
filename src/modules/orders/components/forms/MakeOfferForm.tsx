@@ -37,6 +37,7 @@ import { isAddressEqual } from '../../../../utils/blockchain';
 import { isValidDecimal } from '../../../../utils/numbers';
 import { TOKEN_ICON_URL } from '../../../../utils/token';
 import DurationSelect from '../../../nft/components/DurationSelect';
+import Image from 'next/image';
 
 const appConfig = getAppConfig();
 
@@ -46,7 +47,7 @@ interface Form {
   expiry: Date;
 }
 
-const FormSchema: Yup.SchemaOf<Form> = Yup.object().shape({
+const FormSchema: Yup.ObjectSchema<Form> = Yup.object().shape({
   price: Yup.string().required(),
   tokenAddress: Yup.string().required(),
   expiry: Yup.date().required(),
@@ -150,17 +151,17 @@ export default function MakeOfferForm({ onConfirm, asset, disabled }: Props) {
   const renderImageUrl = (token?: Token) => {
     if (!token) {
       return (
-        <Avatar sx={{ width: 'auto', height: (theme) => theme.spacing(2) }} />
+        <Avatar sx={{ width: 32, height: 32 }} />
       );
     }
 
     if (token.logoURI) {
       return (
-        <img
-          alt={token.name}
+        <Image
+          alt={token.name || ''}
           src={ipfsUriToUrl(token.logoURI || '')}
-          width="auto"
-          height={theme.spacing(2)}
+          width={32}
+          height={32}
         />
       );
     } else {
@@ -171,16 +172,16 @@ export default function MakeOfferForm({ onConfirm, asset, disabled }: Props) {
 
       if (imageUrl) {
         return (
-          <img
-            alt={token.name}
+          <Image
+            alt={token.name || ''}
             src={imageUrl}
-            width="auto"
-            height={theme.spacing(2)}
+            width={32}
+            height={32}
           />
         );
       } else {
         return (
-          <Avatar sx={{ width: 'auto', height: (theme) => theme.spacing(2) }} />
+          <Avatar sx={{ width: 32, height: 32 }} />
         );
       }
     }

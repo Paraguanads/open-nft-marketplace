@@ -118,7 +118,7 @@ export const OrdersIndex: NextPage = () => {
         }
       }
     },
-    [transactions, asset]
+    [transactions, asset, provider]
   );
 
   const handleApproveAssetMutate = useCallback(
@@ -158,7 +158,7 @@ export const OrdersIndex: NextPage = () => {
         }
       }
     },
-    [transactions, asset]
+    [transactions, asset, provider]
   );
 
   const handleApproveAssetError = useCallback(
@@ -200,7 +200,7 @@ export const OrdersIndex: NextPage = () => {
         defaultMessage: 'Creating a listing',
       })
     );
-  }, [signMessageDialog]);
+  }, [signMessageDialog, intl]);
 
   const handleSignMessageError = useCallback(
     (err: any) => {
@@ -217,7 +217,7 @@ export const OrdersIndex: NextPage = () => {
         defaultMessage: 'Creating an offer',
       })
     );
-  }, [signMessageDialog]);
+  }, [signMessageDialog, intl]);
 
   const makeListing = useMakeListingMutation(
     nftSwapSdk,
@@ -335,7 +335,7 @@ export const OrdersIndex: NextPage = () => {
 
   const hasChainDiff = useMemo(() => {
     return asset?.chainId !== undefined && asset?.chainId !== chainId;
-  }, [asset]);
+  }, [asset, chainId]);
 
   return (
     <>
@@ -487,9 +487,9 @@ export const OrdersIndex: NextPage = () => {
                                   src={ipfsUriToUrl(
                                     asset?.metadata?.image || ''
                                   )}
-                                  height="100%"
-                                  width="100%"
-                                  objectFit="contain"
+                                  height={0}
+                                  width={0}
+                                  style={{ height: '100%', width: '100%' }}
                                 />
                               </Box>
                             )}

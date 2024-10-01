@@ -1,6 +1,5 @@
 import { useWeb3React } from '@web3-react/core';
-import { useAtomValue } from 'jotai';
-import { useUpdateAtom } from 'jotai/utils';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, UseMutationOptions } from 'react-query';
 import {
@@ -44,13 +43,13 @@ export function useBlockNumber() {
 }
 
 export function useSwitchNetwork() {
-  const setSwitchOpen = useUpdateAtom(switchNetworkOpenAtom);
-  const setSwitchChainId = useUpdateAtom(switchNetworkChainIdAtom);
+  const setSwitchOpen = useSetAtom(switchNetworkOpenAtom);
+  const setSwitchChainId = useSetAtom(switchNetworkChainIdAtom);
 
   const openDialog = useCallback((chainId: number) => {
     setSwitchOpen(true);
     setSwitchChainId(chainId);
-  }, []);
+  }, [setSwitchOpen, setSwitchChainId]);
 
   return {
     openDialog,
@@ -76,7 +75,7 @@ export function useTokenList({
 }) {
   const tokensValues = useAtomValue(tokensAtom);
 
-  const tokens = [...tokensValues, ...tokenListJson.tokens];
+  const tokens = useMemo(() => [...tokensValues, ...tokenListJson.tokens], [tokensValues]);
 
   return useMemo(() => {
     if (chainId === undefined) {
@@ -122,7 +121,7 @@ export function useTokenList({
     }
 
     return [...tokenList] as Token[];
-  }, [chainId]);
+  }, [chainId, includeNative, tokens]);
 }
 
 export function useTokenData(options?: Omit<UseMutationOptions, any>) {

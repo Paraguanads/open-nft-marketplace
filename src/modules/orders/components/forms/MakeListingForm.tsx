@@ -35,23 +35,20 @@ import { useTokenList } from '../../../../hooks/blockchain';
 import { isAddressEqual } from '../../../../utils/blockchain';
 import { isValidDecimal } from '../../../../utils/numbers';
 import DurationSelect from '../../../nft/components/DurationSelect';
+import Image from 'next/image';
 
 interface Form {
   price: string;
   tokenAddress: string;
   expiry: Date;
-  taker?: string;
+  taker: string | undefined;
 }
 
-const FormSchema: Yup.SchemaOf<Form> = Yup.object().shape({
+const FormSchema: Yup.ObjectSchema<Form> = Yup.object().shape({
   price: Yup.string().required(),
   tokenAddress: Yup.string().required(),
   expiry: Yup.date().required(),
-  taker: Yup.string()
-    .test('address', (value) => {
-      return value !== undefined ? utils.isAddress(value) : true;
-    })
-    .notRequired(),
+  taker: Yup.string().optional().default(undefined),
 });
 
 interface Props {
@@ -105,6 +102,7 @@ export default function MakeListingForm({ onConfirm, disabled }: Props) {
       price: '0',
       expiry: moment().add(MIN_ORDER_DATE_TIME).toDate(),
       tokenAddress: tokenList.length > 0 ? tokenList[0].address : '',
+      taker: undefined,
     },
     validationSchema: FormSchema,
     isInitialValid: false,
@@ -154,11 +152,14 @@ export default function MakeListingForm({ onConfirm, disabled }: Props) {
                         alignContent="center"
                         spacing={1}
                       >
-                        <img
-                          alt={tokenSelected?.name}
-                          src={ipfsUriToUrl(tokenSelected?.logoURI || '')}
-                          style={{ width: 'auto', height: '1rem' }}
-                        />
+                        <div style={{ width: 'auto', height: '2rem' }}>
+                          <Image
+                            alt={tokenSelected?.name || ''}
+                            src={ipfsUriToUrl(tokenSelected?.logoURI || '')}
+                            layout="fill"
+                            objectFit="contain"
+                          />
+                        </div>
                         <Box>
                           <Typography variant="body1">
                             {tokenSelected?.symbol}
@@ -171,10 +172,11 @@ export default function MakeListingForm({ onConfirm, disabled }: Props) {
                   {tokenList.map((token: Token, index: number) => (
                     <MenuItem value={token.address} key={index}>
                       <ListItemIcon>
-                        <img
-                          alt={token.name}
+                        <Image
+                          alt={token.name || ''} 
                           src={ipfsUriToUrl(token.logoURI || '')}
-                          style={{ width: 'auto', height: '1rem' }}
+                          width={32}
+                          height={32}
                         />
                       </ListItemIcon>
                       <ListItemText

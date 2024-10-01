@@ -81,10 +81,10 @@ export function Updater() {
                   }
                 }
 
-                setPendingTransactions((txs: any) => ({
-                  ...txs,
+                setPendingTransactions({
+                  ...pendingTransactions,
                   [hash]: newTx,
-                }));
+                });
               }
             }
           });

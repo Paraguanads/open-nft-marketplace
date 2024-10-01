@@ -19,6 +19,7 @@ import { useConnectWalletDialog } from '../../../hooks/app';
 import { useCurrency } from '../../../hooks/currency';
 import { OrderBookItem } from '../../../types/nft';
 import WalletOrdersTableRow from './WalletOrdersTableRow';
+import Image from 'next/image';
 
 interface Props {
   orders: OrderBookItem[];
@@ -27,14 +28,13 @@ interface Props {
 export function WalletOrdersTable({ orders }: Props) {
   const currency = useCurrency();
   const { isActive } = useWeb3React();
-
   const connectWalletDialog = useConnectWalletDialog();
 
-  const handleConnectWallet = () => {
-    connectWalletDialog.setOpen(true);
-  };
-
   const renderRows = useCallback(() => {
+    const handleConnectWallet = () => {
+      connectWalletDialog.setOpen(true);
+    };
+
     if (!isActive) {
       return (
         <TableRow>
@@ -112,7 +112,7 @@ export function WalletOrdersTable({ orders }: Props) {
     return orders.map((order, index) => (
       <WalletOrdersTableRow key={index} order={order} />
     ));
-  }, [orders, isActive]);
+  }, [orders, isActive, connectWalletDialog]);
 
   return (
     <TableContainer>

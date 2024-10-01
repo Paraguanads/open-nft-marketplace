@@ -22,7 +22,7 @@ import { Language } from '@mui/icons-material';
 import AttachMoney from '@mui/icons-material/AttachMoney';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { useWeb3React } from '@web3-react/core';
-import { useAtomValue, useUpdateAtom } from 'jotai/utils';
+import { useAtom } from 'jotai';
 import { FormattedMessage } from 'react-intl';
 import { useConnectWalletDialog } from '../hooks/app';
 import { useIsBalanceVisible } from '../hooks/misc';
@@ -35,8 +35,6 @@ import {
 import {
   getChainLogoImage,
   getChainName,
-  getWalletIcon,
-  truncateAddress,
 } from '../utils/blockchain';
 import Wallet from './icons/Wallet';
 import Link from './Link';
@@ -56,7 +54,7 @@ interface Props {
 }
 
 function AppDrawer({ open, onClose }: Props) {
-  const { isActive, connector, account, chainId, ENSName } = useWeb3React();
+  const { isActive, chainId } = useWeb3React();
   const isBalancesVisible = useIsBalanceVisible();
 
   const connectWalletDialog = useConnectWalletDialog();
@@ -66,19 +64,18 @@ function AppDrawer({ open, onClose }: Props) {
     connectWalletDialog.setOpen(true);
   };
 
-  const locale = useAtomValue(localeAtom);
-  const currency = useAtomValue(currencyAtom);
+  const [locale] = useAtom(localeAtom);
+  const [currency] = useAtom(currencyAtom);
 
-  const setShowShowSelectCurrency = useUpdateAtom(showSelectCurrencyAtom);
-
-  const setShowShowSelectLocale = useUpdateAtom(showSelectLocaleAtom);
+  const [, setShowSelectCurrency] = useAtom(showSelectCurrencyAtom);
+  const [, setShowSelectLocale] = useAtom(showSelectLocaleAtom);
 
   const handleShowSelectCurrencyDialog = () => {
-    setShowShowSelectCurrency(true);
+    setShowSelectCurrency(true);
   };
 
   const handleShowSelectLocaleDialog = () => {
-    setShowShowSelectLocale(true);
+    setShowSelectLocale(true);
   };
 
   return (

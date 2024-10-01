@@ -62,6 +62,7 @@ enum WalletTabs {
   Trades,
 }
 
+
 const appConfig = getAppConfig();
 
 const Wallet: NextPage = () => {
@@ -84,6 +85,7 @@ const Wallet: NextPage = () => {
     isBalancesVisibleAtom
   );
 
+
   const handleChangeTab = (
     event: React.SyntheticEvent<Element, Event>,
     value: WalletTabs
@@ -91,9 +93,11 @@ const Wallet: NextPage = () => {
     setSelectedTab(value);
   };
 
+
   const handleToggleBalances = () => {
     setIsTableOpen((value) => !value);
   };
+
 
   const handleToggleVisibility = () => {
     setIsBalancesVisible((value) => !value);
@@ -428,6 +432,7 @@ const Wallet: NextPage = () => {
     </>
   );
 };
+
 
 (Wallet as any).getLayout = function getLayout(page: any) {
   return <MainLayout noSsr>{page}</MainLayout>;
