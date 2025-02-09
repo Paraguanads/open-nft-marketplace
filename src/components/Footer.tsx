@@ -49,7 +49,7 @@ export function Footer() {
         >
           <Grid item>
             <Link
-              href="https://dexkit.com/contact-us/"
+              href="https://dexkit.com/"
               color="inherit"
               target="_blank"
             >

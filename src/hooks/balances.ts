@@ -57,17 +57,18 @@ export const useERC20BalancesQuery = (
       
       const balancesWithPrices = balances.map(balance => {
         const tokenAddress = balance.token.address.toLowerCase();
-        const isNativeToken = balance.token.symbol === 'MATIC' || 
-                            balance.token.symbol === 'ETH' ||
-                            tokenAddress === ZEROEX_NATIVE_TOKEN_ADDRESS.toLowerCase();
+        const nativeTokenAddress = ZEROEX_NATIVE_TOKEN_ADDRESS.toLowerCase();
         
-        const price = isNativeToken
-          ? prices?.[ZEROEX_NATIVE_TOKEN_ADDRESS.toLowerCase()]?.usd || 0
-          : balance.token.symbol === 'USDC' || 
-            balance.token.symbol === 'USDT' || 
-            balance.token.symbol === 'DAI'
-            ? 1
-            : prices?.[tokenAddress]?.usd || 0;
+        // Determinar precio basado en el tipo de token
+        let price = 0;
+        if (tokenAddress === nativeTokenAddress || 
+            ['ETH', 'MATIC', 'BNB', 'AVAX', 'FTM'].includes(balance.token.symbol)) {
+          price = prices?.[nativeTokenAddress]?.usd || 0;
+        } else if (['USDC', 'USDT', 'DAI'].includes(balance.token.symbol)) {
+          price = 1;
+        } else {
+          price = prices?.[tokenAddress]?.usd || 0;
+        }
 
         const valueUSD = price * parseFloat(
           utils.formatUnits(balance.balance || '0', balance.token.decimals)
