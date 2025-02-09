@@ -34,6 +34,7 @@ import { SwapApiOrder } from '../../../../types/nft';
 
 import LaunchIcon from '@mui/icons-material/Launch';
 import { useCoinPricesQuery, useCurrency } from '../../../../hooks/currency';
+import { TokenPrice } from '../../../../types/api';
 
 interface Props {
   order?: SwapApiOrder;
@@ -70,25 +71,20 @@ function OffersTableRow({
     if (token && currency && order) {
       if (coinPricesQuery?.data) {
         let ratio = 0;
+        const tokenData = coinPricesQuery.data[token.address.toLowerCase()] as TokenPrice;
 
-        const tokenData = coinPricesQuery.data[token.address.toLowerCase()];
-
-        if (tokenData && currency in tokenData) {
-          ratio = tokenData[currency];
+        if (tokenData) {
+          ratio = tokenData.usd;
         }
 
         if (ratio) {
-          return (
-            ratio *
-            parseFloat(
-              utils.formatUnits(order?.erc20TokenAmount, token.decimals)
-            )
+          return ratio * parseFloat(
+            utils.formatUnits(order?.erc20TokenAmount, token.decimals)
           );
-        } else {
-          return 0;
         }
       }
     }
+    return 0;
   }, [token, coinPricesQuery, currency, order]);
 
   return (

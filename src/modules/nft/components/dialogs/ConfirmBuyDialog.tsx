@@ -27,6 +27,7 @@ import { Token } from '../../../../types/blockchain';
 import { Asset, AssetMetadata } from '../../../../types/nft';
 import { isAddressEqual } from '../../../../utils/blockchain';
 import { ipfsUriToUrl } from '../../../../utils/ipfs';
+import { PriceResponse, TokenPrice } from '../../../../types/api';
 
 interface Props {
   tokens: Token[];
@@ -89,8 +90,8 @@ export function ConfirmBuyDialog({
   const totalInCurrency = useMemo(() => {
     if (token && currency && order) {
       if (coinPricesQuery?.data) {
-        const ratio =
-          coinPricesQuery.data[token.address.toLowerCase()]?.[currency];
+        const tokenPrice = coinPricesQuery.data[token.address.toLowerCase()] as TokenPrice;
+        const ratio = tokenPrice?.usd;
 
         if (ratio) {
           return (
@@ -99,11 +100,10 @@ export function ConfirmBuyDialog({
               utils.formatUnits(order?.erc20TokenAmount, token.decimals)
             )
           );
-        } else {
-          return 0;
         }
       }
     }
+    return 0;
   }, [token, currency, order, coinPricesQuery?.data]);
 
   return (

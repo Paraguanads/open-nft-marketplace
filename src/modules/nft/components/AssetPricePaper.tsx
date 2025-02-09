@@ -84,7 +84,7 @@ export function AssetPricePaper({ address, id }: Props) {
         }
       }
     },
-    [transactions, asset]
+    [transactions, asset, provider]
   );
 
   const handleApproveAssetMutate = useCallback(
@@ -101,7 +101,6 @@ export function AssetPricePaper({ address, id }: Props) {
           );
         } else {
           const amount = variable.asset.amount;
-
           const decimals = await getERC20Decimals(
             variable.asset.tokenAddress,
             provider
@@ -119,7 +118,7 @@ export function AssetPricePaper({ address, id }: Props) {
         }
       }
     },
-    [transactions, asset]
+    [transactions, asset, provider]
   );
 
   const handleApproveAssetError = useCallback(
@@ -149,7 +148,7 @@ export function AssetPricePaper({ address, id }: Props) {
         defaultMessage: 'Creating a listing',
       })
     );
-  }, [signMessageDialog]);
+  }, [signMessageDialog, formatMessage]);
 
   const handleOpenSignMessageOfferDialog = useCallback(() => {
     signMessageDialog.setOpen(true);
@@ -159,11 +158,11 @@ export function AssetPricePaper({ address, id }: Props) {
         defaultMessage: 'Creating an offer',
       })
     );
-  }, [signMessageDialog]);
+  }, [signMessageDialog, formatMessage]);
 
   const handleInvalidateCache = useCallback(() => {
     queryClient.invalidateQueries(GET_NFT_ORDERS);
-  }, [signMessageDialog]);
+  }, [queryClient]);
 
   const handleSignMessageError = useCallback(
     (err: any) => {
@@ -175,7 +174,7 @@ export function AssetPricePaper({ address, id }: Props) {
   const handleSignMessageSuccess = useCallback(() => {
     handleInvalidateCache();
     signMessageDialog.setIsSuccess(true);
-  }, [signMessageDialog]);
+  }, [signMessageDialog, handleInvalidateCache]);
 
   const makeListing = useMakeListingMutation(
     nftSwapSdk,

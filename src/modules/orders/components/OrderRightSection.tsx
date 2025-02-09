@@ -12,7 +12,7 @@ import {
   useTheme,
 } from '@mui/material';
 
-import type { SwappableAssetV4 } from '@traderxyz/nft-swap-sdk';
+import type { SwappableAssetV4, NftSwapV4 } from '@traderxyz/nft-swap-sdk';
 import { useWeb3React } from '@web3-react/core';
 import { utils, BigNumber, constants } from 'ethers';
 import moment from 'moment';
@@ -54,10 +54,12 @@ import {
 import { ipfsUriToUrl } from '../../../utils/ipfs';
 import { OrderPageActions } from './OrderPageActions';
 import Image from 'next/image';
+import type { TokenPrice } from '../../../types/api';
 
 interface Props {
   order?: OrderBookItem;
 }
+
 
 function OrderRightSection({ order }: Props) {
   const { account, provider, chainId } = useWeb3React();
@@ -96,69 +98,78 @@ function OrderRightSection({ order }: Props) {
     if (token && currency && order) {
       if (coinPricesQuery?.data) {
         let ratio = 0;
+        const tokenData = coinPricesQuery.data[token.address.toLowerCase()] as TokenPrice;
 
-        const tokenData = coinPricesQuery.data[token.address.toLowerCase()];
-
-        if (tokenData && currency in tokenData) {
-          ratio = tokenData[currency];
+        if (tokenData) {
+          ratio = tokenData.usd;
         }
 
         if (ratio) {
-          return (
-            ratio *
-            parseFloat(
-              utils.formatUnits(order?.erc20TokenAmount, token.decimals)
-            )
+          return ratio * parseFloat(
+            utils.formatUnits(order?.erc20TokenAmount, token.decimals)
           );
-        } else {
-          return 0;
         }
       }
     }
-  }, [token, coinPricesQuery, currency, order]);
+    return 0;
+  }, [token, coinPricesQuery?.data, currency, order]);
 
   const handleCancelSignedOrderError = useCallback(
-    (error: any) => transactions.setDialogError(error),
+    (error: Error) => {
+      transactions.setDialogError(error);
+    },
     [transactions]
   );
 
   const handleCancelOrderHash = useCallback(
     (hash: string, order: SwapApiOrder) => {
-      if (asset !== undefined) {
+      if (asset) {
         const metadata = { asset, order };
         transactions.setRedirectUrl(
-          `/asset/${getNetworkSlugFromChainId(asset?.chainId)}/${
-            asset?.contractAddress
-          }/${asset?.id}`
+          `/asset/${getNetworkSlugFromChainId(asset.chainId)}/${
+            asset.contractAddress
+          }/${asset.id}`
         );
-
         transactions.addTransaction(hash, TransactionType.CANCEL, metadata);
       }
     },
-    [transactions, asset]
+    [asset, transactions]
   );
 
   const handleCancelSignedOrderMutate = useCallback(
-    ({ order }: { order: SwapApiOrder }) => {
-      if (asset !== undefined) {
-        const metadata: CancelTransactionMetadata = { asset, order };
-
-        transactions.showDialog(true, metadata, TransactionType.CANCEL);
+    async ({ order }: { order: SwapApiOrder }) => {
+      if (provider && nftSwapSdk) {
+        const response = await nftSwapSdk.cancelOrder(
+          order.nonce,
+          'ERC721'
+        );
+        return response;
       }
+    },
+    [provider, nftSwapSdk]
+  );
+
+  const handleFillSignedOrderError = useCallback(
+    (error: Error) => {
+      transactions.setDialogError(error);
     },
     [transactions]
   );
 
-  const handleFillSignedOrderError = useCallback(
-    (error: any) => transactions.setDialogError(error),
-    [transactions]
+  const handleFillSignedOrderMutate = useCallback(
+    async ({ order }: { order: SwapApiOrder }) => {
+      if (provider && nftSwapSdk) {
+        const response = await nftSwapSdk.fillSignedOrder(order);
+        return response;
+      }
+    },
+    [provider, nftSwapSdk]
   );
 
   const handleMutateSignedOrder = useCallback(
     async ({ order, accept }: { order: SwapApiOrder; accept?: boolean }) => {
-      if (asset && order) {
+      if (asset && order && provider) {
         const decimals = await getERC20Decimals(order.erc20Token, provider);
-
         const symbol = await getERC20Symbol(order.erc20Token, provider);
 
         if (accept) {
@@ -186,7 +197,7 @@ function OrderRightSection({ order }: Props) {
         transactions.showDialog(true, metadata, TransactionType.BUY);
       }
     },
-    [transactions, asset]
+    [asset, provider, transactions]
   );
 
   const handleBuyOrderSuccess = useCallback(
@@ -292,7 +303,7 @@ function OrderRightSection({ order }: Props) {
   const fillSignedOrder = useFillSignedOrderMutation(nftSwapSdk, account, {
     onSuccess: handleBuyOrderSuccess,
     onError: handleFillSignedOrderError,
-    onMutate: handleMutateSignedOrder,
+    onMutate: handleFillSignedOrderMutate,
   });
 
   const cancelSignedOrder = useCancelSignedOrderMutation(
@@ -370,7 +381,7 @@ function OrderRightSection({ order }: Props) {
     await fillSignedOrder.mutateAsync({
       order: order.order,
     });
-  }, [transactions, fillSignedOrder, nftSwapSdk, account, order, approveAsset]);
+  }, [fillSignedOrder, nftSwapSdk, account, order, approveAsset]);
 
   const renderActionButton = () => {
     if (isAddressEqual(order?.order.maker, account)) {

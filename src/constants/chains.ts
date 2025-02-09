@@ -15,6 +15,24 @@ const MATIC: AddEthereumChainParameter['nativeCurrency'] = {
   decimals: 18,
 };
 
+const AVAX: AddEthereumChainParameter['nativeCurrency'] = {
+  name: 'Avalanche',
+  symbol: 'AVAX',
+  decimals: 18,
+};
+
+const FTM: AddEthereumChainParameter['nativeCurrency'] = {
+  name: 'Fantom',
+  symbol: 'FTM',
+  decimals: 18,
+};
+
+const CELO: AddEthereumChainParameter['nativeCurrency'] = {
+  name: 'Celo',
+  symbol: 'CELO',
+  decimals: 18,
+};
+
 interface BasicChainInformation {
   urls: string[];
   name: string;
@@ -26,21 +44,21 @@ interface ExtendedChainInformation extends BasicChainInformation {
 }
 
 function isExtendedChainInformation(
-  chainInformation: BasicChainInformation | ExtendedChainInformation
+  chainInformation: BasicChainInformation | ExtendedChainInformation | undefined
 ): chainInformation is ExtendedChainInformation {
-  return !!(chainInformation as ExtendedChainInformation).nativeCurrency;
+  return !!chainInformation && !!(chainInformation as ExtendedChainInformation).nativeCurrency;
 }
 
 export function getAddChainParameters(
-  chainId: number
+  chainId: ChainId
 ): AddEthereumChainParameter | number {
   const chainInformation = CHAINS[chainId];
-  if (isExtendedChainInformation(chainInformation)) {
+  if (chainInformation && isExtendedChainInformation(chainInformation)) {
     return {
       chainId,
       chainName: chainInformation.name,
       nativeCurrency: chainInformation.nativeCurrency,
-      rpcUrls: chainInformation.urls as string[],
+      rpcUrls: chainInformation.urls,
       blockExplorerUrls: chainInformation.blockExplorerUrls,
     };
   } else {
@@ -48,121 +66,97 @@ export function getAddChainParameters(
   }
 }
 
-export const CHAINS: {
-  [chainId: number]: BasicChainInformation | ExtendedChainInformation;
-} = {
-  [ChainId.ETH]: {
+type ChainConfig = {
+  [K in ChainId]?: BasicChainInformation | ExtendedChainInformation;
+};
+
+export const CHAINS: ChainConfig = {
+  [ChainId.ETHEREUM]: {
     urls: [
       infuraKey ? `https://mainnet.infura.io/v3/${infuraKey}` : undefined,
       process.env.alchemyKey
         ? `https://eth-mainnet.alchemyapi.io/v2/${process.env.alchemyKey}`
         : undefined,
       'https://cloudflare-eth.com',
-    ].filter((url) => url !== undefined) as string[],
-    name: 'Mainnet',
-  },
-  [ChainId.Ropsten]: {
-    urls: [
-      infuraKey ? `https://ropsten.infura.io/v3/${infuraKey}` : undefined,
-    ].filter((url) => url !== undefined) as string[],
-    name: 'Ropsten',
-  },
-  [ChainId.Rinkeby]: {
-    urls: [
-      infuraKey ? `https://rinkeby.infura.io/v3/${infuraKey}` : undefined,
-    ].filter((url) => url !== undefined) as string[],
-    name: 'Rinkeby',
-  },
-  5: {
-    urls: [
-      infuraKey ? `https://goerli.infura.io/v3/${infuraKey}` : undefined,
-    ].filter((url) => url !== undefined) as string[],
-    name: 'Görli',
-  },
-  42: {
-    urls: [
-      infuraKey ? `https://kovan.infura.io/v3/${infuraKey}` : undefined,
-    ].filter((url) => url !== undefined) as string[],
-    name: 'Kovan',
-  },
-  // Optimism
-  [ChainId.Optimism]: {
-    urls: [
-      infuraKey
-        ? `https://optimism-mainnet.infura.io/v3/${infuraKey}`
-        : undefined,
-      'https://mainnet.optimism.io',
-    ].filter((url) => url !== undefined) as string[],
-    name: 'Optimism',
+    ].filter((url): url is string => url !== undefined),
+    name: 'Ethereum Mainnet',
     nativeCurrency: ETH,
-    blockExplorerUrls: ['https://optimistic.etherscan.io'],
+    blockExplorerUrls: ['https://etherscan.io'],
   },
-  69: {
-    urls: [
-      infuraKey
-        ? `https://optimism-kovan.infura.io/v3/${infuraKey}`
-        : undefined,
-      'https://kovan.optimism.io',
-    ].filter((url) => url !== undefined) as string[],
-    name: 'Optimism Kovan',
-    nativeCurrency: ETH,
-    blockExplorerUrls: ['https://kovan-optimistic.etherscan.io'],
-  },
-  // Arbitrum
-  [ChainId.Arbitrum]: {
-    urls: [
-      infuraKey
-        ? `https://arbitrum-mainnet.infura.io/v3/${infuraKey}`
-        : undefined,
-      'https://arb1.arbitrum.io/rpc',
-    ].filter((url) => url !== undefined) as string[],
-    name: 'Arbitrum One',
-    nativeCurrency: ETH,
-    blockExplorerUrls: ['https://arbiscan.io'],
-  },
-  421611: {
-    urls: [
-      infuraKey
-        ? `https://arbitrum-rinkeby.infura.io/v3/${infuraKey}`
-        : undefined,
-      'https://rinkeby.arbitrum.io/rpc',
-    ].filter((url) => url !== undefined) as string[],
-    name: 'Arbitrum Testnet',
-    nativeCurrency: ETH,
-    blockExplorerUrls: ['https://testnet.arbiscan.io'],
-  },
-  // Polygon
-  [ChainId.Polygon]: {
+  [ChainId.POLYGON]: {
     urls: [
       infuraKey
         ? `https://polygon-mainnet.infura.io/v3/${infuraKey}`
         : undefined,
       'https://polygon-rpc.com',
-    ].filter((url) => url !== undefined) as string[],
+    ].filter((url): url is string => url !== undefined),
     name: 'Polygon Mainnet',
     nativeCurrency: MATIC,
     blockExplorerUrls: ['https://polygonscan.com'],
   },
-  80001: {
+  [ChainId.OPTIMISM]: {
     urls: [
       infuraKey
-        ? `https://polygon-mumbai.infura.io/v3/${infuraKey}`
+        ? `https://optimism-mainnet.infura.io/v3/${infuraKey}`
         : undefined,
-    ].filter((url) => url !== undefined) as string[],
-    name: 'Polygon Mumbai',
-    nativeCurrency: MATIC,
-    blockExplorerUrls: ['https://mumbai.polygonscan.com'],
+      'https://mainnet.optimism.io',
+    ].filter((url): url is string => url !== undefined),
+    name: 'Optimism',
+    nativeCurrency: ETH,
+    blockExplorerUrls: ['https://optimistic.etherscan.io'],
+  },
+  [ChainId.ARBITRUM]: {
+    urls: [
+      infuraKey
+        ? `https://arbitrum-mainnet.infura.io/v3/${infuraKey}`
+        : undefined,
+      'https://arb1.arbitrum.io/rpc',
+    ].filter((url): url is string => url !== undefined),
+    name: 'Arbitrum One',
+    nativeCurrency: ETH,
+    blockExplorerUrls: ['https://arbiscan.io'],
+  },
+  [ChainId.BASE]: {
+    urls: [
+      'https://mainnet.base.org',
+    ],
+    name: 'Base',
+    nativeCurrency: ETH,
+    blockExplorerUrls: ['https://basescan.org'],
+  },
+  [ChainId.AVALANCHE]: {
+    urls: [
+      'https://api.avax.network/ext/bc/C/rpc',
+    ],
+    name: 'Avalanche',
+    nativeCurrency: AVAX,
+    blockExplorerUrls: ['https://snowtrace.io'],
+  },
+  [ChainId.FANTOM]: {
+    urls: [
+      'https://rpc.ftm.tools',
+    ],
+    name: 'Fantom Opera',
+    nativeCurrency: FTM,
+    blockExplorerUrls: ['https://ftmscan.com'],
+  },
+  [ChainId.CELO]: {
+    urls: [
+      'https://forno.celo.org',
+    ],
+    name: 'Celo',
+    nativeCurrency: CELO,
+    blockExplorerUrls: ['https://celoscan.io'],
   },
 };
 
-export const URLS: { [chainId: number]: string[] } = Object.keys(
-  CHAINS
-).reduce<{ [chainId: number]: string[] }>((accumulator, chainId) => {
-  const validURLs: string[] = CHAINS[Number(chainId)].urls;
-
-  if (validURLs.length) {
-    accumulator[Number(chainId)] = validURLs;
-  }
-
-  return accumulator;
-}, {});
+export const URLS: Record<ChainId, string[]> = Object.entries(CHAINS).reduce<Record<ChainId, string[]>>(
+  (acc, [chainId, chainInfo]) => {
+    const validURLs = chainInfo?.urls || [];
+    if (validURLs.length) {
+      acc[Number(chainId) as ChainId] = validURLs;
+    }
+    return acc;
+  },
+  {} as Record<ChainId, string[]>
+);

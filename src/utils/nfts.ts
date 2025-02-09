@@ -37,7 +37,7 @@ export function truncateErc1155TokenId(id?: string) {
 
 export function getNFTMediaSrcAndType(address: string, chainId: ChainId, tokenId: string): { type: 'iframe' | 'image', src?: string } {
 
-  if (address.toLowerCase() === '0x5428dff180837ce215c8abe2054e048da311b751' && chainId === ChainId.Polygon) {
+  if (address.toLowerCase() === '0x5428dff180837ce215c8abe2054e048da311b751' && chainId === ChainId.POLYGON) {
     return { type: 'iframe', src: `https://arpeggi.io/player?type=song&token=${tokenId}` }
   }
 

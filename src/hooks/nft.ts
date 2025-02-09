@@ -503,7 +503,7 @@ export const useAssetListFromOrderbook = (orderFilter: TraderOrderFilter) => {
           provider,
           collection,
           itensCollection.map((or) => or.nftTokenId),
-          nftType === NFTType.ERC1155
+          nftType
         );
         if (nfts) {
           assets = assets.concat(nfts);

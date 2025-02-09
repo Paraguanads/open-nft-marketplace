@@ -29,6 +29,7 @@ import MomentFromNow from '../../../../components/MomentFromNow';
 import { useTokenList } from '../../../../hooks/blockchain';
 import { useCoinPricesQuery, useCurrency } from '../../../../hooks/currency';
 import { Asset, SwapApiOrder } from '../../../../types/nft';
+import { TokenPrice } from '../../../../types/api';
 
 interface Props {
   chainId: string;
@@ -68,25 +69,20 @@ export function ListingsTableRow({
     if (token && currency && order) {
       if (coinPricesQuery?.data) {
         let ratio = 0;
+        const tokenData = coinPricesQuery.data[token.address.toLowerCase()] as TokenPrice;
 
-        const tokenData = coinPricesQuery.data[token.address.toLowerCase()];
-
-        if (tokenData && currency in tokenData) {
-          ratio = tokenData[currency];
+        if (tokenData) {
+          ratio = tokenData.usd;
         }
 
         if (ratio) {
-          return (
-            ratio *
-            parseFloat(
-              utils.formatUnits(order?.erc20TokenAmount, token.decimals)
-            )
+          return ratio * parseFloat(
+            utils.formatUnits(order?.erc20TokenAmount, token.decimals)
           );
-        } else {
-          return 0;
         }
       }
     }
+    return 0;
   }, [token, coinPricesQuery, currency, order]);
 
   return (

@@ -17,20 +17,24 @@ export function GET_TOKEN(address: string, chainId: number) {
 
 export function TOKEN_ICON_URL(address: string, chainId?: ChainId) {
   switch (chainId) {
-    case ChainId.ETH:
+    case ChainId.ETHEREUM:
       return `https://raw.githubusercontent.com/trustwallet/tokens/master/blockchains/ethereum/assets/${address}/logo.png`;
-    case ChainId.Polygon:
+    case ChainId.POLYGON:
       return `https://raw.githubusercontent.com/trustwallet/tokens/master/blockchains/polygon/assets/${address}/logo.png`;
-    case ChainId.AVAX:
+    case ChainId.AVALANCHE:
       return `https://raw.githubusercontent.com/trustwallet/tokens/master/blockchains/avalanchex/assets/${address}/logo.png`;
-    case ChainId.BSC:
-      return `https://raw.githubusercontent.com/trustwallet/tokens/master/blockchains/binance/assets/${address}/logo.png`;
+    /* case ChainId.BINANCE:
+      return `https://raw.githubusercontent.com/trustwallet/tokens/master/blockchains/binance/assets/${address}/logo.png`; */
     case ChainId.FANTOM:
       return `https://raw.githubusercontent.com/trustwallet/tokens/master/blockchains/fantom/assets/${address}/logo.png`;
     case ChainId.CELO:
       return `https://raw.githubusercontent.com/trustwallet/tokens/master/blockchains/celo/assets/${address}/logo.png`;
-    case ChainId.Optimism:
+    case ChainId.OPTIMISM:
       return `https://raw.githubusercontent.com/trustwallet/tokens/master/blockchains/optimism/assets/${address}/logo.png`;
+    case ChainId.ARBITRUM:
+      return `https://raw.githubusercontent.com/trustwallet/tokens/master/blockchains/arbitrum/assets/${address}/logo.png`;
+    case ChainId.BASE:
+      return `https://raw.githubusercontent.com/trustwallet/tokens/master/blockchains/base/assets/${address}/logo.png`;
     default:
       return '';
   }
