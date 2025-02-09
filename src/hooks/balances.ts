@@ -12,6 +12,9 @@ import {
 } from '../services/balances';
 import { Token, TokenBalance } from '../types/blockchain';
 import { useTokenList } from './blockchain';
+import { useTokenPrices, useNativeTokenPrice } from './prices';
+import { useCoinPricesQuery } from './currency';
+import { utils } from 'ethers';
 
 export const GET_ERC20_BALANCES = 'GET_ERC20_BALANCES';
 export const GET_ERC20_BALANCE = 'GET_ERC20_BALANCE';
@@ -22,28 +25,70 @@ type SelectCalback = (data?: TokenBalance[]) => TokenBalance[] | undefined;
 export const selectNativeCurrency: SelectCalback = (data?: TokenBalance[]) =>
   data?.filter((t) => t.token.address === ZEROEX_NATIVE_TOKEN_ADDRESS);
 
-export const useERC20BalancesQuery = (select?: SelectCalback) => {
-  const { provider, account, chainId } = useWeb3React();
+interface BalancesQueryOptions {
+  showEmptyBalances?: boolean;
+  select?: (data: TokenBalance[]) => TokenBalance[] | undefined;
+}
 
+export const useERC20BalancesQuery = (
+  optionsOrSelect?: 
+    | BalancesQueryOptions 
+    | boolean 
+    | ((data: TokenBalance[]) => TokenBalance[] | undefined)
+) => {
+  const { provider, account, chainId } = useWeb3React();
   const tokens = useTokenList({ chainId, includeNative: true });
+  const { data: prices } = useCoinPricesQuery({ includeNative: true });
+
+  const normalizedOptions: BalancesQueryOptions = typeof optionsOrSelect === 'function' 
+    ? { select: optionsOrSelect, showEmptyBalances: true }
+    : typeof optionsOrSelect === 'boolean'
+    ? { showEmptyBalances: optionsOrSelect }
+    : { showEmptyBalances: true, ...optionsOrSelect };
 
   return useQuery(
-    [GET_ERC20_BALANCES, account, chainId, tokens],
-    () => {
-      if (
-        provider === undefined ||
-        account === undefined ||
-        chainId === undefined ||
-        tokens === undefined
-      ) {
-        return;
-      }
-      if (tokens.length === 0) {
+    ['erc20Balances', account, chainId, normalizedOptions.showEmptyBalances],
+    async () => {
+      if (!provider || !account || !chainId || !tokens) {
         return [];
       }
-      return getERC20Balances(account, tokens, chainId, provider);
+
+      const balances = await getERC20Balances(account, tokens, chainId, provider);
+      
+      const balancesWithPrices = balances.map(balance => {
+        const tokenAddress = balance.token.address.toLowerCase();
+        const isNativeToken = balance.token.symbol === 'MATIC' || 
+                            balance.token.symbol === 'ETH' ||
+                            tokenAddress === ZEROEX_NATIVE_TOKEN_ADDRESS.toLowerCase();
+        
+        const price = isNativeToken
+          ? prices?.[ZEROEX_NATIVE_TOKEN_ADDRESS.toLowerCase()]?.usd || 0
+          : balance.token.symbol === 'USDC' || 
+            balance.token.symbol === 'USDT' || 
+            balance.token.symbol === 'DAI'
+            ? 1
+            : prices?.[tokenAddress]?.usd || 0;
+
+        const valueUSD = price * parseFloat(
+          utils.formatUnits(balance.balance || '0', balance.token.decimals)
+        );
+
+        return {
+          ...balance,
+          priceUSD: price,
+          valueUSD
+        };
+      });
+
+      return normalizedOptions.showEmptyBalances 
+        ? balancesWithPrices
+        : balancesWithPrices.filter(b => b.valueUSD > 0);
     },
-    { enabled: provider !== undefined, select, suspense: true }
+    {
+      enabled: Boolean(provider && account && chainId),
+      staleTime: 30000,
+      cacheTime: 60000
+    }
   );
 };
 
@@ -178,3 +223,38 @@ export function useErc20ApproveMutation(
 
   return mutation;
 }
+
+export const useERC20BalancesWithPricesQuery = (select?: SelectCalback) => {
+  const { provider, account, chainId } = useWeb3React();
+  const tokens = useTokenList({ chainId, includeNative: true });
+  const { data: tokenPrices } = useTokenPrices(
+    tokens?.filter(t => t.address !== '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+      .map(t => t.address) || []
+  );
+  const { data: nativePrice } = useNativeTokenPrice();
+
+  return useQuery(
+    [GET_ERC20_BALANCES, account, chainId, tokens],
+    async () => {
+      if (!provider || !account || !chainId || !tokens) {
+        return [];
+      }
+
+      const balances = await getERC20Balances(account, tokens, chainId, provider);
+      
+      return balances.map(balance => ({
+        ...balance,
+        priceUSD: balance.token.address === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+          ? nativePrice?.usd
+          : tokenPrices?.[balance.token.address.toLowerCase()]?.usd || 0
+      }));
+    },
+    { 
+      enabled: Boolean(provider && tokens?.length), 
+      select,
+      suspense: true,
+      staleTime: 30000,
+      cacheTime: 60000
+    }
+  );
+};

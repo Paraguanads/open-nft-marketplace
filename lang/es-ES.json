@@ -990,9 +990,9 @@
   "advanced.info": {
     "defaultMessage": "Solo la dirección mostrada debajo puede comprar este listado. Si está vacío, cualquier cuenta puede comprar este listado."
   },
-  "and.made.with.love.by": {
-    "defaultMessage": "y hecho con ❤️ por",
-    "description": "y hecho con ❤️ por"
+  "made.with.love.by": {
+    "defaultMessage": "hecho con ❤️ por",
+    "description": "hecho con ❤️ por"
   },
   "approve.asset.description": {
     "defaultMessage": "hacia la App"

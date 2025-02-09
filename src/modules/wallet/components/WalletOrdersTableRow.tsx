@@ -13,7 +13,7 @@ import { FormattedMessage, FormattedNumber } from 'react-intl';
 import Link from '../../../components/Link';
 import MomentFromNow from '../../../components/MomentFromNow';
 import { useTokenList } from '../../../hooks/blockchain';
-import { useCoinPricesQuery, useCurrency } from '../../../hooks/currency';
+import { useCurrency } from '../../../hooks/currency';
 import { OrderBookItem } from '../../../types/nft';
 import { OrderDirection } from '../../../types/orderbook';
 import {
@@ -45,51 +45,22 @@ export function WalletOrdersTableRow({ order }: Props) {
           alignContent="center"
         >
           <Avatar src={token.logoURI} sx={{ width: 'auto', height: '1rem' }} />
-
           <Typography variant="inherit">
-            {
-              <FormattedNumber
-                currency={currency}
-                value={parseFloat(
-                  utils.formatUnits(
-                    order.order.erc20TokenAmount,
-                    token.decimals
-                  )
-                )}
-              />
-            }{' '}
+            <FormattedNumber
+              value={parseFloat(
+                utils.formatUnits(order.order.erc20TokenAmount, token.decimals)
+              )}
+              maximumFractionDigits={6}
+            />{' '}
             {token.symbol.toUpperCase()}
           </Typography>
         </Stack>
       );
-    } else {
-      return (
-        <FormattedMessage id="unknown.token" defaultMessage={'Unknown token'} />
-      );
     }
+    return (
+      <FormattedMessage id="unknown.token" defaultMessage={'Unknown token'} />
+    );
   }, [order, token]);
-
-  const coinPricesQuery = useCoinPricesQuery({ includeNative: true });
-
-  const totalInCurrency = useMemo(() => {
-    if (token && currency && order) {
-      if (coinPricesQuery?.data) {
-        const ratio =
-          coinPricesQuery.data[token.address.toLowerCase()][currency];
-
-        if (ratio) {
-          return (
-            ratio *
-            parseFloat(
-              utils.formatUnits(order?.erc20TokenAmount, token.decimals)
-            )
-          );
-        } else {
-          return 0;
-        }
-      }
-    }
-  }, [token, coinPricesQuery, currency, order]);
 
   return (
     <TableRow>
@@ -130,7 +101,13 @@ export function WalletOrdersTableRow({ order }: Props) {
         )}
       </TableCell>
       <TableCell>
-        {totalInCurrency} {currency.toUpperCase()}
+        <FormattedNumber
+          value={order.usdValue || 0}
+          style="currency"
+          currency={currency.toUpperCase()}
+          minimumFractionDigits={2}
+          maximumFractionDigits={2}
+        />
       </TableCell>
       <TableCell>{amountRow}</TableCell>
       <TableCell>

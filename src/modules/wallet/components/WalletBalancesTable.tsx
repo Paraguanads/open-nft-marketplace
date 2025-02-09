@@ -6,12 +6,15 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Box,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { FormattedMessage } from 'react-intl';
 import { QueryErrorResetBoundary } from 'react-query';
@@ -25,52 +28,51 @@ interface Props {
 }
 
 function WalletBalancesTable({ isBalancesVisible }: Props) {
-  const tokenBalancesQuery = useERC20BalancesQuery();
-  const coinPricesQuery = useCoinPricesQuery({ includeNative: true });
-  const prices = coinPricesQuery.data;
+  const [showEmptyBalances, setShowEmptyBalances] = useState(true);
+  const tokenBalancesQuery = useERC20BalancesQuery({ showEmptyBalances });
   const currency = useCurrency();
 
-  const tokenBalancesWithPrices = useMemo(() => {
-    return tokenBalancesQuery?.data?.map((tb) => {
-      return {
-        ...tb,
-        price:
-          prices && prices[tb.token.address.toLowerCase()]
-            ? prices[tb.token.address.toLowerCase()][currency]
-            : undefined,
-      };
-    });
-  }, [prices, tokenBalancesQuery.data, currency]);
-
   return (
-    <TableContainer>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>
-              <FormattedMessage id="token" defaultMessage="Token" />
-            </TableCell>
-            <TableCell>
-              <FormattedMessage id="total" defaultMessage="Total" />
-            </TableCell>
-            <TableCell>
-              <FormattedMessage id="balance" defaultMessage="Balance" />
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {tokenBalancesWithPrices?.map((token, index: number) => (
-            <WalletTableRow
-              key={index}
-              tokenBalance={token}
-              price={token.price}
-              isBalancesVisible={isBalancesVisible}
-              currency={currency}
+    <>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={!showEmptyBalances}
+              onChange={(e) => setShowEmptyBalances(!e.target.checked)}
             />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          }
+          label={<FormattedMessage id="hideEmptyBalances" defaultMessage="Hide empty balances" />}
+        />
+      </Box>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <FormattedMessage id="token" defaultMessage="Token" />
+              </TableCell>
+              <TableCell>
+                <FormattedMessage id="total" defaultMessage="Total" />
+              </TableCell>
+              <TableCell>
+                <FormattedMessage id="balance" defaultMessage="Balance" />
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {tokenBalancesQuery.data?.map((tokenBalance, index) => (
+              <WalletTableRow
+                key={index}
+                tokenBalance={tokenBalance}
+                isBalancesVisible={isBalancesVisible}
+                currency={currency}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 }
 

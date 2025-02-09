@@ -997,9 +997,9 @@
 	"advanced.info": {
 		"defaultMessage": "Somente o endereço inserido abaixo pode comprar esta listagem. Se estiver vazio, qualquer conta pode comprar esta listagem."
 	},
-	"and.made.with.love.by": {
-		"defaultMessage": "e feito com ❤️ por",
-		"description": "and made with ❤️ by"
+	"made.with.love.by": {
+		"defaultMessage": "feito com ❤️ por",
+		"description": "made with ❤️ by"
 	},
 	"approve.asset.description": {
 		"defaultMessage": "para App"

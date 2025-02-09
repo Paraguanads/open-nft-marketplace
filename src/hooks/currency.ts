@@ -1,4 +1,4 @@
-import { ChainId } from '@0x/contract-addresses';
+import { ChainId } from '../constants/enum';
 import { useWeb3React } from '@web3-react/core';
 import axios from 'axios';
 import { useAtom, useAtomValue } from 'jotai';
@@ -6,65 +6,61 @@ import { useQuery } from 'react-query';
 import {
   COINGECKO_ENDPOIT,
   COINGECKO_PLATFORM_ID,
-  ZEROEX_NATIVE_TOKEN_ADDRESS
+  ZEROEX_NATIVE_TOKEN_ADDRESS,
+  isSupportedPlatform
 } from '../constants';
 import { NETWORKS } from '../constants/chain';
-import { getCoinPrices, getTokenPrices } from '../services/currency';
+import { getCoinPrices, getTokenPrices, getNativeTokenPrice } from '../services/currency';
 import { currencyAtom } from '../state/atoms';
 import { useTokenList } from './blockchain';
+import { isSupportedChainId, SupportedChainId } from '../constants';
+import { PriceResponse } from '../types/api';
 
 export function useCurrency(): string {
   return useAtomValue(currencyAtom) || 'usd';
 }
 
-export const GET_COIN_PRICES = 'GET_COIN_PRICES';
-
 export const useCoinPricesQuery = ({
-  includeNative,
+  includeNative = true
 }: {
-  includeNative: boolean;
+  includeNative?: boolean;
 }) => {
-  const { provider, chainId } = useWeb3React();
-  const tokens = useTokenList({ chainId });
+  const { chainId: web3ChainId } = useWeb3React();
+  const tokens = useTokenList({ chainId: web3ChainId, includeNative });
   const currency = useCurrency();
-  return useQuery(
-    [GET_COIN_PRICES, chainId, tokens, currency],
-    async () => {
-      if (
-        provider === undefined ||
-        chainId === undefined ||
-        (tokens === undefined && !includeNative)
-      ) {
-        return;
-      }
-      const prices: { [key: string]: { [key: string]: number } } = {};
 
-      if (includeNative) {
-        const activeNetwork = NETWORKS[chainId];
-        if (activeNetwork && activeNetwork.coingeckoId) {
-          const nativePrice = await getCoinPrices({
-            coingeckoIds: [activeNetwork.coingeckoId],
-            currency,
-          });
-          if (nativePrice[`${activeNetwork.coingeckoId}`]) {
-            prices[ZEROEX_NATIVE_TOKEN_ADDRESS] =
-              nativePrice[`${activeNetwork.coingeckoId}`];
-          }
+  return useQuery(
+    ['coinPrices', web3ChainId, tokens?.map(t => t.address).join(','), currency],
+    async () => {
+      if (!web3ChainId || !tokens?.length) return {};
+
+      let prices: PriceResponse = {};
+
+      const chainId = web3ChainId as unknown as ChainId;
+
+      if (includeNative && isSupportedPlatform(chainId)) {
+        const nativePrice = await getNativeTokenPrice(chainId, currency);
+        if (nativePrice) {
+          prices[ZEROEX_NATIVE_TOKEN_ADDRESS.toLowerCase()] = nativePrice;
         }
       }
 
-      if (tokens.length === 0) {
-        return prices;
+      if (tokens.length > 0) {
+        const tokenPrices = await getTokenPrices({
+          chainId,
+          addresses: tokens.map(t => t.address.toLowerCase()),
+          currency
+        });
+        prices = { ...prices, ...tokenPrices };
       }
-      const addresses = tokens.map((t) => t.address);
-      const tokenPrices = await getTokenPrices({
-        addresses,
-        currency,
-        chainId,
-      });
-      return { ...prices, ...tokenPrices };
+
+      return prices;
     },
-    { enabled: provider !== undefined, suspense: false }
+    {
+      enabled: Boolean(web3ChainId) && tokens?.length > 0,
+      staleTime: 30000,
+      refetchInterval: 30000
+    }
   );
 };
 
@@ -75,7 +71,7 @@ export function useFiatRatio({
   contractAddress,
   currency,
 }: {
-  chainId?: ChainId;
+  chainId?: number;
   contractAddress?: string;
   currency?: string;
 }) {
@@ -86,7 +82,12 @@ export function useFiatRatio({
         return;
       }
 
-      const platformId = COINGECKO_PLATFORM_ID[chainId];
+      if (!isSupportedChainId(chainId)) {
+        return;
+      }
+
+      const supportedChainId: SupportedChainId = chainId;
+      const platformId = COINGECKO_PLATFORM_ID[supportedChainId];
 
       if (!platformId) {
         return;

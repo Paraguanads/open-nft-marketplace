@@ -13,6 +13,7 @@ import {
   getMulticallTokenBalances,
   getMulticallTokenBalancesAndAllowances
 } from './multical';
+import { getTokenPrices } from './currency';
 
 export const getERC20Decimals = async (
   contractAddress?: string,
@@ -88,10 +89,9 @@ export const getERC20Balances = async (
   tokens: Token[],
   chainId: ChainId,
   provider: providers.JsonRpcProvider
-) => {
+): Promise<TokenBalance[]> => {
   const tokensByChainId = tokens.filter((t) => t.chainId === chainId);
 
-  // Add here native token address
   const tokenAddressesWithNative = [
     MULTICALL_NATIVE_TOKEN_ADDRESS,
     ...tokensByChainId
@@ -108,19 +108,31 @@ export const getERC20Balances = async (
   if (multicallBalanceResult) {
     const [, tokenBalances] = multicallBalanceResult;
 
+    const tokenAddresses = tokensByChainId.map(t => t.address.toLowerCase());
+    const prices = await getTokenPrices({
+      chainId,
+      addresses: tokenAddresses,
+      currency: 'usd'
+    });
+
+
     return tokensByChainId.map((t) => {
       let addr = t.address.toLowerCase();
 
       if (addr === ZEROEX_NATIVE_TOKEN_ADDRESS) {
         addr = MULTICALL_NATIVE_TOKEN_ADDRESS;
-        // it's the native currency
       }
+
+      const balance = tokenBalances[addr];
+      const price = prices[addr]?.['usd'] || 0;
 
       return {
         token: t,
-        balance: tokenBalances[addr],
+        balance,
+        priceUSD: price,
+        valueUSD: price * parseFloat(utils.formatUnits(balance || '0', t.decimals))
       };
-    }) as TokenBalance[];
+    });
   }
 
   return [];
@@ -137,13 +149,13 @@ export const getERC20WithProxyUnlockedBalances = async (
   const zrxContracts = getContractAddressesForChainOrThrow(chainId as number);
 
   const exchangeProxy = zrxContracts.exchangeProxy;
-  // Add here native token address
   const tokenAddressesWithNative = [
     MULTICALL_NATIVE_TOKEN_ADDRESS,
     ...tokensByChainId
       .filter((t) => t.address.toLowerCase() !== ZEROEX_NATIVE_TOKEN_ADDRESS)
       .map((t) => t.address.toLowerCase()),
   ];
+
 
   const multicallBalanceResult = await getMulticallTokenBalancesAndAllowances(
     tokenAddressesWithNative,

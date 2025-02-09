@@ -6,6 +6,8 @@ import { useTokenList } from '../../../hooks/blockchain';
 import { usePositionPaginator } from '../../../hooks/misc';
 import { useAssetMetadataFromList, useOrderBook } from '../../../hooks/nft';
 import WalletOrdersTable from './WalletOrdersTable';
+import { useTokenPrices } from '../../../hooks/prices';
+import { utils } from 'ethers';
 
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -22,6 +24,13 @@ export function WalletOrders({ filter }: Props) {
   const paginator = usePositionPaginator();
 
   const tokens = useTokenList({ chainId, includeNative: true });
+
+  const tokenAddresses = useMemo(() => 
+    tokens.map(t => t.address.toLowerCase()),
+    [tokens]
+  );
+  
+  const { data: tokenPrices } = useTokenPrices(tokenAddresses);
 
   const { data: orders } = useOrderBook({
     chainId,
@@ -43,9 +52,27 @@ export function WalletOrders({ filter }: Props) {
 
   const assets = assetsQuery.data;
 
+  const ordersWithPrices = useMemo(() => {
+    if (!orders?.orders || !tokenPrices) return [];
+    
+    return orders.orders.map(order => {
+      const tokenAddress = order.erc20Token.toLowerCase();
+      const price = tokenPrices[tokenAddress]?.usd || 0;
+      const amount = utils.formatUnits(
+        order.erc20TokenAmount,
+        tokens.find(t => t.address.toLowerCase() === tokenAddress)?.decimals || 18
+      );
+      
+      return {
+        ...order,
+        usdValue: price * parseFloat(amount)
+      };
+    });
+  }, [orders, tokenPrices, tokens]);
+
   const ordersWithMetadata = useMemo(() => {
-    if (orders?.orders && assets && tokens) {
-      return orders?.orders.map((or) => {
+    if (ordersWithPrices && assets && tokens) {
+      return ordersWithPrices.map((or) => {
         return {
           ...or,
           token: tokens.find(
@@ -60,7 +87,7 @@ export function WalletOrders({ filter }: Props) {
       });
     }
     return [];
-  }, [assets, tokens, orders]);
+  }, [assets, tokens, ordersWithPrices]);
 
   return (
     <Stack>

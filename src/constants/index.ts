@@ -21,7 +21,7 @@ export const ETH_COIN: Token = {
   decimals: 18,
   address: ZEROEX_NATIVE_TOKEN_ADDRESS,
   logoURI: '',
-  chainId: ChainId.ETH,
+  chainId: ChainId.ETHEREUM,
 };
 
 export const MATIC_COIN: Token = {
@@ -30,22 +30,76 @@ export const MATIC_COIN: Token = {
   decimals: 18,
   address: ZEROEX_NATIVE_TOKEN_ADDRESS,
   logoURI: '',
-  chainId: ChainId.Polygon,
+  chainId: ChainId.POLYGON,
 };
 
 export const MIN_ORDER_DATE_TIME = moment.duration(1, 'hour');
 
 export const COINGECKO_ENDPOIT = 'https://api.coingecko.com/api/v3';
 
-export const COINGECKO_PLATFORM_ID: { [key: number]: string } = {
-  [ChainId.ETH]: 'ethereum',
-  [ChainId.Polygon]: 'polygon-pos',
-  [ChainId.BSC]: 'binance-smart-chain',
-  [ChainId.AVAX]: 'avalanche',
-  [ChainId.CELO]: 'celo',
+export const COIN_GECKO_API_URL = 'https://pro-api.coingecko.com/api/v3';
+export const COIN_GECKO_API_KEY = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
+
+export function isSupportedChainId(chainId: number): chainId is SupportedChainId {
+  return SUPPORTED_CHAINS.includes(chainId as SupportedChainId);
+}
+
+export type SupportedChainId = Extract<
+  ChainId,
+  | ChainId.ETHEREUM
+  | ChainId.POLYGON
+  | ChainId.OPTIMISM
+  | ChainId.ARBITRUM
+  | ChainId.BASE
+  | ChainId.AVALANCHE
+  | ChainId.FANTOM
+  | ChainId.CELO
+/*   | ChainId.BSC */
+>;
+
+export const BASE_URL = 'https://api.coingecko.com/api/v3';
+export const CACHE_DURATION = 30000;
+
+export const COINGECKO_PLATFORM_ID: Partial<Record<ChainId, string>> = {
+  [ChainId.POLYGON]: 'polygon-pos',
+  [ChainId.MUMBAI]: 'polygon-mumbai',
+  [ChainId.OPTIMISM]: 'optimistic-ethereum',
+  [ChainId.ARBITRUM]: 'arbitrum-one',
+  [ChainId.BASE]: 'base',
+  [ChainId.AVALANCHE]: 'avalanche-c-chain',
   [ChainId.FANTOM]: 'fantom',
-  [ChainId.Optimism]: 'optimistic-ethereum',
+  [ChainId.CELO]: 'celo',
+/*   [ChainId.BSC]: 'binancecoin'
+ */} as const;
+
+
+export const isSupportedPlatform = (chainId: number): chainId is ChainId => {
+  return chainId in COINGECKO_PLATFORM_ID;
 };
+
+export const SUPPORTED_CHAINS = [
+  ChainId.ETHEREUM,
+  ChainId.POLYGON,
+  ChainId.OPTIMISM,
+  ChainId.ARBITRUM,
+  ChainId.BASE,
+  ChainId.AVALANCHE,
+  ChainId.FANTOM,
+  ChainId.CELO,
+/*   ChainId.BSC
+ */] as const;
+
+export const NATIVE_TOKEN_COINGECKO_IDS: Record<SupportedChainId, string> = {
+  [ChainId.ETHEREUM]: 'ethereum',
+  [ChainId.POLYGON]: 'matic-network',
+  [ChainId.OPTIMISM]: 'ethereum',
+  [ChainId.ARBITRUM]: 'ethereum',
+  [ChainId.BASE]: 'ethereum',
+  [ChainId.AVALANCHE]: 'avalanche-2',
+  [ChainId.FANTOM]: 'fantom',
+  [ChainId.CELO]: 'celo',
+/*   [ChainId.BSC]: 'binancecoin'
+ */} as const;
 
 export const LANGUAGES: Language[] = [
   { name: 'English (US)', locale: 'en-US' },
@@ -55,3 +109,16 @@ export const LANGUAGES: Language[] = [
 ];
 
 export const CURRENCIES: Currency[] = [{ symbol: 'usd', name: 'US Dollar' }];
+
+export const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
+export const WRAPPED_TOKENS: { [chainId: number]: string } = {
+  [ChainId.ETHEREUM]: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+  [ChainId.POLYGON]: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+  [ChainId.OPTIMISM]: '0x4200000000000000000000000000000000000006',
+  [ChainId.ARBITRUM]: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+  [ChainId.BASE]: '0x4200000000000000000000000000000000000006',
+/*   [ChainId.BSC]: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
+ */};
+
+export const GET_COIN_PRICES = 'GET_COIN_PRICES';

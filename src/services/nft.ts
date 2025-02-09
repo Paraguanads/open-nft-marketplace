@@ -16,6 +16,27 @@ const ENS_BASE_URL = 'https://metadata.ens.domains';
 
 const metadataENSapi = axios.create({ baseURL: ENS_BASE_URL });
 
+const METADATA_TIMEOUT = 10000;
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000;
+
+const retry = async (fn: () => Promise<any>, retries: number): Promise<any> => {
+  try {
+    return await Promise.race([
+      fn(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), METADATA_TIMEOUT)
+      )
+    ]);
+  } catch (error) {
+    if (retries > 0) {
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+      return retry(fn, retries - 1);
+    }
+    throw error;
+  }
+};
+
 export async function getAssetData(
   provider?: providers.JsonRpcProvider,
   contractAddress?: string,
@@ -24,60 +45,81 @@ export async function getAssetData(
   if (!provider || !contractAddress || !id) {
     return;
   }
-  if (isENSContract(contractAddress)) {
-    const data = await getENSAssetData(provider, contractAddress, id);
-    return data;
-  }
 
-  const multicall = await getMulticallFromProvider(provider);
-  const iface = new utils.Interface(ERC721Abi);
-  let calls: CallInput[] = [];
-  calls.push({
-    interface: iface,
-    target: contractAddress,
-    function: 'ownerOf',
-    args: [id],
-  });
+  try {
+    if (isENSContract(contractAddress)) {
+      const data = await retry(
+        () => getENSAssetData(provider, contractAddress, id),
+        MAX_RETRIES
+      );
+      return data;
+    }
 
-  calls.push({
-    interface: iface,
-    target: contractAddress,
-    function: 'tokenURI',
-    args: [id],
-  });
+    const multicall = await getMulticallFromProvider(provider);
+    const iface = new utils.Interface(ERC721Abi);
+    let calls: CallInput[] = [];
+    calls.push({
+      interface: iface,
+      target: contractAddress,
+      function: 'ownerOf',
+      args: [id],
+    });
 
-  calls.push({
-    interface: iface,
-    target: contractAddress,
-    function: 'name',
-  });
+    calls.push({
+      interface: iface,
+      target: contractAddress,
+      function: 'tokenURI',
+      args: [id],
+    });
 
-  calls.push({
-    interface: iface,
-    target: contractAddress,
-    function: 'symbol',
-  });
+    calls.push({
+      interface: iface,
+      target: contractAddress,
+      function: 'name',
+    });
 
-  const response = await multicall?.multiCall(calls);
+    calls.push({
+      interface: iface,
+      target: contractAddress,
+      function: 'symbol',
+    });
 
-  if (response) {
-    const [, results] = response;
-    const owner = results[0];
-    const tokenURI = results[1];
-    const name = results[2];
-    const symbol = results[3];
+    const response = await retry(
+      async () => multicall?.multiCall(calls),
+      MAX_RETRIES
+    );
 
-    const { chainId } = await provider.getNetwork();
+    if (response) {
+      const [, results] = response;
+      
+      if (!results || results.length < 4) {
+        throw new Error('Incomplete metadata response');
+      }
 
-    return {
-      owner,
-      tokenURI,
-      collectionName: name,
-      symbol,
-      id,
-      contractAddress,
-      chainId,
-    };
+      const [owner, tokenURI, name, symbol] = results;
+      
+      if (!owner || !tokenURI) {
+        throw new Error('Missing critical metadata');
+      }
+
+      const { chainId } = await provider.getNetwork();
+
+      return {
+        owner,
+        tokenURI,
+        collectionName: name || 'Unknown Collection',
+        symbol: symbol || 'Unknown',
+        id,
+        contractAddress,
+        chainId,
+      };
+    }
+    
+    throw new Error('No response from multicall');
+    
+  } catch (error) {
+    console.error('Error fetching asset data:', error);
+    throw new Error(`Failed to fetch asset data: ${(error as Error).message}`);
   }
 }
 
@@ -175,69 +217,107 @@ export async function getAssetsFromOrderbook(
   return assets;
 }
 
-//Return multiple assets at once
 export async function getAssetsData(
   provider: providers.JsonRpcProvider,
   contractAddress: string,
   ids: string[],
+  account?: string,
   isERC1155 = false
 ): Promise<Asset[] | undefined> {
-  if (isENSContract(contractAddress)) {
-    const data: Asset[] = [];
-    for (const id of ids) {
-      const response = await getENSAssetData(provider, contractAddress, id);
+  try {
+    const assetsCache = new Map<string, Asset>();
+    
+    const batchSize = 20;
+    const assets: Asset[] = [];
+    
+    if (isERC1155 && !account) {
+      throw new Error('Account is required for ERC1155 tokens');
+    }
+
+
+    for (let i = 0; i < ids.length; i += batchSize) {
+      const batch = ids.slice(i, i + batchSize);
+      
+      const multicall = await getMulticallFromProvider(provider);
+      const iface = new utils.Interface(isERC1155 ? ERC1155Abi : ERC721Abi);
+      
+      const calls: CallInput[] = [];
+      
+      calls.push({
+        interface: iface,
+        target: contractAddress,
+        function: 'name'
+      });
+
+      
+      calls.push({
+        interface: iface,
+        target: contractAddress,
+        function: 'symbol'
+      });
+
+      for (const id of batch) {
+        if (!assetsCache.has(id)) {
+          calls.push({
+            interface: iface,
+            target: contractAddress,
+            function: isERC1155 ? 'balanceOf' : 'ownerOf',
+            args: isERC1155 ? [account, id] : [id]
+          });
+          
+          calls.push({
+            interface: iface,
+            target: contractAddress,
+            function: 'tokenURI',
+            args: [id]
+          });
+        }
+      }
+
+      const response = await retry(
+        async () => multicall?.multiCall(calls),
+        MAX_RETRIES
+      );
+
       if (response) {
-        data.push(response);
+        const [, results] = response;
+        const name = results[0];
+        const symbol = results[1];
+        
+        let resultIndex = 2;
+        for (const id of batch) {
+          if (!assetsCache.has(id)) {
+            const owner = results[resultIndex++];
+            const tokenURI = results[resultIndex++];
+            
+            const { chainId } = await provider.getNetwork();
+            
+            const asset: Asset = {
+              owner,
+              tokenURI,
+              collectionName: name || 'Unknown Collection',
+              symbol: symbol || 'Unknown',
+              id,
+              contractAddress,
+              chainId,
+              lastUpdated: Date.now()
+            };
+            
+            assets.push(asset);
+            assetsCache.set(id, asset);
+          } else {
+            assets.push(assetsCache.get(id)!);
+          }
+        }
       }
     }
-    return data;
-  }
-
-
-  const multicall = await getMulticallFromProvider(provider);
-  const iface = new utils.Interface(isERC1155 ? ERC1155Abi : ERC721Abi);
-  let calls: CallInput[] = [];
-  calls.push({
-    interface: iface,
-    target: contractAddress,
-    function: 'name',
-  });
-
-  calls.push({
-    interface: iface,
-    target: contractAddress,
-    function: 'symbol',
-  });
-  for (let index = 0; index < ids.length; index++) {
-    calls.push({
-      interface: iface,
-      target: contractAddress,
-      function: isERC1155 ? 'uri' : 'tokenURI',
-      args: [ids[index]],
-    });
-  }
-
-  const response = await multicall?.multiCall(calls);
-  const assets: Asset[] = [];
-  if (response) {
-    const { chainId } = await provider.getNetwork();
-    const [, results] = response;
-    const name = results[0];
-    const symbol = results[1];
-
-    for (let index = 0; index < ids.length; index++) {
-      assets.push({
-        tokenURI: results[index + 2],
-        collectionName: name,
-        symbol,
-        id: ids[index],
-        contractAddress,
-        chainId,
-      });
-    }
+    
     return assets;
+    
+  } catch (error) {
+    console.error('Error fetching assets data:', error);
+    throw new Error(`Failed to fetch assets data: ${(error as Error).message}`);
   }
-  return assets;
 }
 
 export async function getAssetMetadata(

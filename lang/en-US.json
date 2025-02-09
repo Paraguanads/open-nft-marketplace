@@ -960,10 +960,11 @@
 	"advanced.info": {
 		"defaultMessage": "Only the address entered below can buy this listing. If empty, any account can buy this listing."
 	},
-	"and.made.with.love.by": {
-		"defaultMessage": "and made with ❤️ by",
-		"description": "and made with ❤️ by"
+	"made.with.love.by": {
+		"defaultMessage": "made with ❤️ by",
+		"description": "made with ❤️ by"
 	},
+
 	"approve.asset.description": {
 		"defaultMessage": "to App"
 	},

@@ -34,6 +34,7 @@ export interface OrderBookItem {
   orders?: SwapApiOrder[];
   asset?: Asset;
   token?: Token;
+  usdValue?: number;
 }
 
 export interface Collection {
@@ -44,16 +45,29 @@ export interface Collection {
   nftType?: NFTType;
 }
 
+export interface AssetError {
+  message: string;
+  code?: string;
+  retries?: number;
+  context?: {
+    contractAddress: string;
+    tokenId: string;
+    chainId?: number;
+  };
+}
+
 export interface Asset {
   id: string;
   chainId: number;
   contractAddress: string;
-  owner?: string;
+  owner: string;
   tokenURI: string;
   collectionName: string;
   symbol: string;
   type?: string;
   metadata?: AssetMetadata;
+  error?: AssetError;
+  lastUpdated?: number;
 }
 
 export interface AssetMetadata {

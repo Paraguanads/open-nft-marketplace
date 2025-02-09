@@ -84,10 +84,11 @@
   "analytics": {
     "defaultMessage": "Analytika"
   },
-  "and.made.with.love.by": {
-    "defaultMessage": "and made with ❤️ by",
-    "description": "and made with ❤️ by"
+  "made.with.love.by": {
+    "defaultMessage": "vytvořeno s ❤️",
+    "description": "made with ❤️ by"
   },
+
   "approve.asset.description": {
     "defaultMessage": "Do aplikace"
   },

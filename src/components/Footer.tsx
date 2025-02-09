@@ -65,18 +65,18 @@ export function Footer() {
               <Link href="/" color="primary">
                 {appConfig.name}
               </Link>{' '}
-              <FormattedMessage
+              {/* <FormattedMessage
                 defaultMessage="is powered by"
                 id="is.powered.by"
                 description="is powered by"
               />{' '}
               <Link variant="inherit" href="https://0x.org/" color="inherit">
                 <strong>0x</strong>
-              </Link>{' '}
+              </Link>{' '} */}
               <FormattedMessage
-                id="and.made.with.love.by"
-                defaultMessage="and made with ❤️ by"
-                description="and made with ❤️ by"
+                id="made.with.love.by"
+                defaultMessage="made with ❤️ by"
+                description="made with ❤️ by"
               />{' '}
               <Link
                 variant="inherit"

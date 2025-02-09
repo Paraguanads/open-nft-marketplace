@@ -1,18 +1,18 @@
 import { Network } from '../types/chains';
 import { ChainId } from './enum';
 
-import avaxIcon from '../../public/assets/images/icons/avax.png';
-import bscIcon from '../../public/assets/images/icons/bnb.svg';
+import avaxIcon from '../../public/assets/images/icons/avax.svg';
+/* import bscIcon from '../../public/assets/images/icons/bnb.svg'; */
 import optimismIcon from '../../public/assets/images/icons/optimism.svg';
 import fantomIcon from '../../public/assets/images/icons/fantom.svg';
-import ethIcon from '../../public/assets/images/icons/eth.png';
-import polygonIcon from '../../public/assets/images/icons/polygon.png';
-import arbitrumIcon from '../../public/assets/images/icons/arbitrum.png';
-
+import ethIcon from '../../public/assets/images/icons/eth.svg';
+import polygonIcon from '../../public/assets/images/icons/polygon.svg';
+import arbitrumIcon from '../../public/assets/images/icons/arbitrum.svg';
+import baseIcon from '../../public/assets/images/icons/base-logo-in-blue.svg';
 
 export const NETWORKS: { [key: number]: Network } = {
-  [ChainId.ETH]: {
-    chainId: ChainId.ETH,
+  [ChainId.ETHEREUM]: {
+    chainId: ChainId.ETHEREUM,
     symbol: 'ETH',
     explorerUrl: 'https://etherscan.io',
     name: 'Ethereum',
@@ -22,8 +22,8 @@ export const NETWORKS: { [key: number]: Network } = {
     imageUrl: ethIcon.src,
     providerRpcUrl: `https://eth.llamarpc.com`,
   },
-  [ChainId.Mumbai]: {
-    chainId: ChainId.Mumbai,
+  [ChainId.MUMBAI]: {
+    chainId: ChainId.MUMBAI,
     symbol: 'MATIC',
     explorerUrl: 'https://mumbai.polygonscan.com',
     name: 'Mumbai',
@@ -33,30 +33,19 @@ export const NETWORKS: { [key: number]: Network } = {
     providerRpcUrl: `https://rpc.ankr.com/polygon_mumbai`,
     testnet: true,
   },
-  [ChainId.Polygon]: {
-    chainId: ChainId.Polygon,
+  [ChainId.POLYGON]: {
+    chainId: ChainId.POLYGON,
     symbol: 'MATIC',
     explorerUrl: 'https://polygonscan.com',
     name: 'Polygon',
     slug: 'polygon',
     coingeckoId: 'matic-network',
-    wrappedAddress: `0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270`,
-    providerRpcUrl: `https://polygon-rpc.com/`,
+    wrappedAddress: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
     imageUrl: polygonIcon.src,
+    providerRpcUrl: 'https://polygon-rpc.com',
   },
-  [ChainId.BSC]: {
-    chainId: ChainId.BSC,
-    symbol: 'BNB',
-    explorerUrl: 'https://bscscan.com',
-    name: 'Smart Chain',
-    slug: 'bsc',
-    coingeckoId: 'binancecoin',
-    wrappedAddress: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
-    providerRpcUrl: 'https://binance.llamarpc.com',
-    imageUrl: bscIcon.src,
-  },
-  [ChainId.Sepolia]: {
-    chainId: ChainId.Rinkeby,
+  [ChainId.SEPOLIA]: {
+    chainId: ChainId.SEPOLIA,
     symbol: 'ETH',
     explorerUrl: 'https://sepolia.etherscan.io/',
     name: 'Sepolia',
@@ -66,8 +55,8 @@ export const NETWORKS: { [key: number]: Network } = {
     providerRpcUrl: `https://public.stackup.sh/api/v1/node/ethereum-sepolia`,
     testnet: true,
   },
-  [ChainId.AVAX]: {
-    chainId: ChainId.AVAX,
+  [ChainId.AVALANCHE]: {
+    chainId: ChainId.AVALANCHE,
     symbol: 'AVAX',
     explorerUrl: 'https://snowtrace.io',
     name: 'Avalanche',
@@ -88,8 +77,8 @@ export const NETWORKS: { [key: number]: Network } = {
     imageUrl: fantomIcon.src,
     providerRpcUrl: 'https://rpc.ftm.tools',
   },
-  [ChainId.Optimism]: {
-    chainId: ChainId.Optimism,
+  [ChainId.OPTIMISM]: {
+    chainId: ChainId.OPTIMISM,
     symbol: 'OP',
     nativeCurrencyUrl: ethIcon.src,
     explorerUrl: 'https://optimistic.etherscan.io',
@@ -105,8 +94,8 @@ export const NETWORKS: { [key: number]: Network } = {
       symbol: 'ETH'
     }
   },
-  [ChainId.Arbitrum]: {
-    chainId: ChainId.Arbitrum,
+  [ChainId.ARBITRUM]: {
+    chainId: ChainId.ARBITRUM,
     symbol: 'ARB',
     explorerUrl: 'https://arbiscan.io/',
     name: 'Arbitrum',
@@ -120,6 +109,22 @@ export const NETWORKS: { [key: number]: Network } = {
       name: 'Ethereum',
       decimals: 18,
       symbol: 'ETH',
+    }
+  },
+  [ChainId.BASE]: {
+    chainId: ChainId.BASE,
+    symbol: 'ETH',
+    explorerUrl: 'https://basescan.org',
+    name: 'Base',
+    slug: 'base',
+    coingeckoId: 'ethereum',
+    wrappedAddress: '0x4200000000000000000000000000000000000006',
+    imageUrl: baseIcon.src,
+    providerRpcUrl: 'https://mainnet.base.org',
+    nativeCurrency: {
+      name: 'Ethereum',
+      decimals: 18,
+      symbol: 'ETH'
     }
   },
 };

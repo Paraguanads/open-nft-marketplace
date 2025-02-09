@@ -1,27 +1,27 @@
 import { useIntl } from 'react-intl';
 import {
   Alert,
-  Avatar,
-  Box,
   Button,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogProps,
+
   List,
   ListItemButton,
   ListItemIcon,
-  ListItemSecondaryAction,
   ListItemText,
-  Radio,
   Stack,
+  DialogTitle,
 } from '@mui/material';
 import { useState } from 'react';
 import { NETWORKS } from '../../constants/chain';
 import { useSwitchNetworkMutation } from '../../hooks/blockchain';
-import { Network } from '../../types/chains';
-import { AppDialogTitle } from '../AppDialogTitle';
+import { isSupportedChainId } from '../../constants';
+import { useWeb3React } from '@web3-react/core';
+import Image from 'next/image';
+
 
 interface Props {
   dialogProps: DialogProps;
@@ -30,23 +30,24 @@ interface Props {
 function SwitchNetworkDialog({ dialogProps }: Props) {
   const intl = useIntl();
   const { onClose } = dialogProps;
+  const { chainId } = useWeb3React();
 
-  const [chainId, setChainId] = useState<number>();
+  const [selectedChainId, setSelectedChainId] = useState<number>();
 
   const switchNetworkMutation = useSwitchNetworkMutation();
 
   const handleClose = () => {
     onClose!({}, 'backdropClick');
-    setChainId(undefined);
+    setSelectedChainId(undefined);
   };
 
   const handleSwitchNetwork = async () => {
-    if (chainId !== undefined) {
-      if (typeof chainId === 'number') {
-        await switchNetworkMutation.mutateAsync({ chainId });
-      } else if (typeof chainId === 'string') {
+    if (selectedChainId !== undefined) {
+      if (typeof selectedChainId === 'number') {
+        await switchNetworkMutation.mutateAsync({ chainId: selectedChainId });
+      } else if (typeof selectedChainId === 'string') {
         await switchNetworkMutation.mutateAsync({
-          chainId: parseInt('0x' + chainId, 16),
+          chainId: parseInt('0x' + selectedChainId, 16),
         });
       }
 
@@ -55,11 +56,11 @@ function SwitchNetworkDialog({ dialogProps }: Props) {
   };
 
   const handleSelectNetwork = (id: number) => {
-    if (id === chainId) {
-      return setChainId(undefined);
+    if (id === selectedChainId) {
+      return setSelectedChainId(undefined);
     }
 
-    setChainId(id);
+    setSelectedChainId(id);
   };
 
   const handleReset = () => {
@@ -68,14 +69,7 @@ function SwitchNetworkDialog({ dialogProps }: Props) {
 
   return (
     <Dialog {...dialogProps}>
-      <AppDialogTitle
-        title={intl.formatMessage({
-          id: "switch.network",
-          defaultMessage: "Switch Network",
-          description: "Switch network dialog title"
-        })}
-        onClose={handleClose}
-      />
+      <DialogTitle>Seleccionar Red</DialogTitle>
       <DialogContent dividers sx={{ p: 0 }}>
         <Stack spacing={2}>
           {switchNetworkMutation.isError && (
@@ -84,48 +78,31 @@ function SwitchNetworkDialog({ dialogProps }: Props) {
             </Alert>
           )}
           <List disablePadding>
-            {Object.keys(NETWORKS)
-              .filter((k) => !NETWORKS[parseInt(k)].testnet)
-              .map((key: any, index: number) => (
+            {Object.entries(NETWORKS)
+              .filter(([id, network]) => {
+                const numId = parseInt(id);
+                return isSupportedChainId(numId) && 
+                       network && 
+                       !network.testnet;
+              })
+              .map(([id, network]) => (
                 <ListItemButton
+                  key={id}
                   disabled={switchNetworkMutation.isLoading}
-                  selected={(NETWORKS[key] as Network).chainId === chainId}
-                  key={index}
-                  onClick={() =>
-                    handleSelectNetwork((NETWORKS[key] as Network).chainId)
-                  }
+                  selected={chainId === parseInt(id)}
+                  onClick={() => handleSelectNetwork(parseInt(id))}
                 >
                   <ListItemIcon>
-                    <Box
-                      sx={{
-                        width: (theme) => theme.spacing(6),
-                        display: 'flex',
-                        alignItems: 'center',
-                        alignContent: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Avatar
-                        src={(NETWORKS[key] as Network).imageUrl}
-                        sx={(theme) => ({
-                          width: 'auto',
-                          height: theme.spacing(4),
-                        })}
-                        alt={(NETWORKS[key] as Network).name}
+                    {network.imageUrl && (
+                      <Image
+                        src={network.imageUrl}
+                        alt={network.name}
+                        width={32}
+                        height={32}
                       />
-                    </Box>
+                    )}
                   </ListItemIcon>
-
-                  <ListItemText
-                    primary={(NETWORKS[key] as Network).name}
-                    secondary={(NETWORKS[key] as Network).symbol}
-                  />
-                  <ListItemSecondaryAction>
-                    <Radio
-                      name="chainId"
-                      checked={(NETWORKS[key] as Network).chainId === chainId}
-                    />
-                  </ListItemSecondaryAction>
+                  <ListItemText primary={network.name} />
                 </ListItemButton>
               ))}
           </List>
@@ -135,7 +112,7 @@ function SwitchNetworkDialog({ dialogProps }: Props) {
         <Button
           variant="contained"
           color="primary"
-          disabled={switchNetworkMutation.isLoading || chainId === undefined}
+          disabled={switchNetworkMutation.isLoading || selectedChainId === undefined}
           startIcon={
             switchNetworkMutation.isLoading ? (
               <CircularProgress color="inherit" size="1rem" />
@@ -163,5 +140,4 @@ function SwitchNetworkDialog({ dialogProps }: Props) {
     </Dialog>
   );
 }
-
 export default SwitchNetworkDialog;

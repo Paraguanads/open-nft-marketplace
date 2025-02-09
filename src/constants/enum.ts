@@ -23,7 +23,7 @@ export enum TraderOrderVisibility {
 
 export enum NetworkName {
   ETH = 'eth',
-  BSC = 'bsc',
+/*   BSC = 'bsc', */
   POLYGON = 'polygon',
   AVAX = 'avax',
   FANTOM = 'ftm',
@@ -35,18 +35,20 @@ export enum NetworkName {
 }
 
 export enum ChainId {
-  ETH = 1,
-  Ropsten = 3,
-  BSC = 56,
-  Polygon = 137,
-  AVAX = 43114,
+  ETHEREUM = 1,
+  ROPSTEN = 3,
+/*   BSC = 56, */
+  POLYGON = 137,
+  AVALANCHE = 43114,
   FANTOM = 250,
-  Rinkeby = 4,
-  Mumbai = 80001,
-  Optimism = 10,
-  Arbitrum = 42161,
+  RINKEBY = 4,
+  MUMBAI = 80001,
+  OPTIMISM = 10,
+  ARBITRUM = 42161,
   CELO = 42220,
-  Sepolia = 11155111
+  SEPOLIA = 11155111,
+  BASE = 8453,
+  GOERLI = 5
 }
 
 export enum NFTType {

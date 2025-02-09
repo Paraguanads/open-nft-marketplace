@@ -1,6 +1,4 @@
-
 import type { BigNumber } from 'ethers';
-import { ChainId } from '../constants/enum';
 import { Asset, SwapApiOrder } from './nft';
 
 export enum TransactionStatus {
@@ -79,15 +77,17 @@ export interface Transaction {
 export interface Token {
   address: string;
   symbol: string;
-  name: string;
   decimals: number;
-  chainId: ChainId;
-  logoURI: string;
+  name: string;
+  logoURI?: string;
+  chainId?: number;
 }
 
 export interface TokenBalance {
   token: Token;
   balance: BigNumber;
+  priceUSD?: number;
+  valueUSD?: number;
   isProxyUnlocked?: boolean;
 }
 
